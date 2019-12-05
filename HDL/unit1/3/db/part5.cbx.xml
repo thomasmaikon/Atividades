@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<LOG_ROOT>
+	<PROJECT NAME="part5">
+		<CBX_INST_ENTRY INSTANCE_NAME="|part5|exibir:exibe1|lpm_divide:Mod0" CBX_FILE_NAME="lpm_divide_45m.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|part5|exibir:exibe2|lpm_divide:Mod0" CBX_FILE_NAME="lpm_divide_45m.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|part5|exibir:exibe3|lpm_divide:Mod0" CBX_FILE_NAME="lpm_divide_45m.tdf"/>
+	</PROJECT>
+</LOG_ROOT>

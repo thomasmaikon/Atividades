@@ -1,0 +1,68 @@
+|part2
+SW[0] => entrada1[0].IN2
+SW[1] => entrada1[1].IN1
+SW[2] => entrada1[2].IN1
+SW[3] => entrada1[3].IN1
+HEX0[0] <= numero:v0.saida
+HEX0[1] <= numero:v0.saida
+HEX0[2] <= numero:v0.saida
+HEX0[3] <= numero:v0.saida
+HEX0[4] <= numero:v0.saida
+HEX0[5] <= numero:v0.saida
+HEX0[6] <= numero:v0.saida
+HEX1[0] <= numero:v1.saida
+HEX1[1] <= numero:v1.saida
+HEX1[2] <= numero:v1.saida
+HEX1[3] <= numero:v1.saida
+HEX1[4] <= numero:v1.saida
+HEX1[5] <= numero:v1.saida
+HEX1[6] <= numero:v1.saida
+
+
+|part2|muxer:m1
+entradax[0] => saida.DATAA
+entradax[1] => saida.DATAA
+entradax[2] => saida.DATAA
+entradax[3] => saida.DATAA
+entraday[0] => saida.DATAB
+entraday[1] => saida.DATAB
+entraday[2] => saida.DATAB
+entraday[3] => saida.DATAB
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+saida[0] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part2|numero:v0
+entrada[0] => Decoder0.IN3
+entrada[1] => Decoder0.IN2
+entrada[2] => Decoder0.IN1
+entrada[3] => Decoder0.IN0
+saida[0] <= WideOr6.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= WideOr5.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= WideOr4.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= WideOr3.DB_MAX_OUTPUT_PORT_TYPE
+saida[4] <= WideOr2.DB_MAX_OUTPUT_PORT_TYPE
+saida[5] <= WideOr1.DB_MAX_OUTPUT_PORT_TYPE
+saida[6] <= WideOr0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part2|numero:v1
+entrada[0] => Decoder0.IN3
+entrada[1] => Decoder0.IN2
+entrada[2] => Decoder0.IN1
+entrada[3] => Decoder0.IN0
+saida[0] <= WideOr6.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= WideOr5.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= WideOr4.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= WideOr3.DB_MAX_OUTPUT_PORT_TYPE
+saida[4] <= WideOr2.DB_MAX_OUTPUT_PORT_TYPE
+saida[5] <= WideOr1.DB_MAX_OUTPUT_PORT_TYPE
+saida[6] <= WideOr0.DB_MAX_OUTPUT_PORT_TYPE
+
+

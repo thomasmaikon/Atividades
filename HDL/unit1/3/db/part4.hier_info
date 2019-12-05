@@ -1,0 +1,29 @@
+|part4
+SW[0] => SW[0].IN3
+SW[1] => SW[1].IN3
+LEDR[0] <= FFD:ff0.Qa
+LEDR[1] <= PosFF:ff1.Q
+LEDR[2] <= NegFF:ff2.Q
+
+
+|part4|FFD:ff0
+D => S.IN0
+D => R.IN0
+Clk => S.IN1
+Clk => R.IN1
+Qa <= Qa.DB_MAX_OUTPUT_PORT_TYPE
+Qb <= r1.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|PosFF:ff1
+D => Q~reg0.DATAIN
+Clk => Q~reg0.CLK
+Q <= Q~reg0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|NegFF:ff2
+D => Q~reg0.DATAIN
+Clk => Q~reg0.CLK
+Q <= Q~reg0.DB_MAX_OUTPUT_PORT_TYPE
+
+

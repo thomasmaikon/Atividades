@@ -1,0 +1,98 @@
+|part2
+HEX0[0] <= exibir:ex1.HEX0
+HEX0[1] <= exibir:ex1.HEX0
+HEX0[2] <= exibir:ex1.HEX0
+HEX0[3] <= exibir:ex1.HEX0
+HEX0[4] <= exibir:ex1.HEX0
+HEX0[5] <= exibir:ex1.HEX0
+HEX0[6] <= exibir:ex1.HEX0
+HEX1[0] <= exibir:ex1.HEX1
+HEX1[1] <= exibir:ex1.HEX1
+HEX1[2] <= exibir:ex1.HEX1
+HEX1[3] <= exibir:ex1.HEX1
+HEX1[4] <= exibir:ex1.HEX1
+HEX1[5] <= exibir:ex1.HEX1
+HEX1[6] <= exibir:ex1.HEX1
+KEY[0] => Q[0].ACLR
+KEY[0] => Q[1].ACLR
+KEY[0] => Q[2].ACLR
+KEY[0] => Q[3].ACLR
+KEY[0] => Q[4].ACLR
+KEY[0] => Q[5].ACLR
+KEY[0] => Q[6].ACLR
+KEY[0] => Q[7].ACLR
+KEY[0] => Q[8].ACLR
+KEY[1] => Q[0].CLK
+KEY[1] => Q[1].CLK
+KEY[1] => Q[2].CLK
+KEY[1] => Q[3].CLK
+KEY[1] => Q[4].CLK
+KEY[1] => Q[5].CLK
+KEY[1] => Q[6].CLK
+KEY[1] => Q[7].CLK
+KEY[1] => Q[8].CLK
+
+
+|part2|exibir:ex1
+SW[0] => Mod0.IN11
+SW[0] => Div0.IN11
+SW[1] => Mod0.IN10
+SW[1] => Div0.IN10
+SW[2] => Mod0.IN9
+SW[2] => Div0.IN9
+SW[3] => Mod0.IN8
+SW[3] => Div0.IN8
+SW[4] => Mod0.IN7
+SW[4] => Div0.IN7
+SW[5] => Mod0.IN6
+SW[5] => Div0.IN6
+SW[6] => Mod0.IN5
+SW[6] => Div0.IN5
+SW[7] => Mod0.IN4
+SW[7] => Div0.IN4
+HEX0[0] <= numero:v0.saida
+HEX0[1] <= numero:v0.saida
+HEX0[2] <= numero:v0.saida
+HEX0[3] <= numero:v0.saida
+HEX0[4] <= numero:v0.saida
+HEX0[5] <= numero:v0.saida
+HEX0[6] <= numero:v0.saida
+HEX1[0] <= numero:v1.saida
+HEX1[1] <= numero:v1.saida
+HEX1[2] <= numero:v1.saida
+HEX1[3] <= numero:v1.saida
+HEX1[4] <= numero:v1.saida
+HEX1[5] <= numero:v1.saida
+HEX1[6] <= numero:v1.saida
+
+
+|part2|exibir:ex1|numero:v0
+entrada[0] => Decoder0.IN4
+entrada[1] => Decoder0.IN3
+entrada[2] => Decoder0.IN2
+entrada[3] => Decoder0.IN1
+entrada[4] => Decoder0.IN0
+saida[0] <= WideOr6.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= WideOr5.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= WideOr4.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= WideOr3.DB_MAX_OUTPUT_PORT_TYPE
+saida[4] <= WideOr2.DB_MAX_OUTPUT_PORT_TYPE
+saida[5] <= WideOr1.DB_MAX_OUTPUT_PORT_TYPE
+saida[6] <= WideOr0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part2|exibir:ex1|numero:v1
+entrada[0] => Decoder0.IN4
+entrada[1] => Decoder0.IN3
+entrada[2] => Decoder0.IN2
+entrada[3] => Decoder0.IN1
+entrada[4] => Decoder0.IN0
+saida[0] <= WideOr6.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= WideOr5.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= WideOr4.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= WideOr3.DB_MAX_OUTPUT_PORT_TYPE
+saida[4] <= WideOr2.DB_MAX_OUTPUT_PORT_TYPE
+saida[5] <= WideOr1.DB_MAX_OUTPUT_PORT_TYPE
+saida[6] <= WideOr0.DB_MAX_OUTPUT_PORT_TYPE
+
+

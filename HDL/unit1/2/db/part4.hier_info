@@ -1,0 +1,323 @@
+|part4
+SW[0] => SW[0].IN2
+SW[1] => SW[1].IN2
+SW[2] => SW[2].IN2
+SW[3] => SW[3].IN2
+SW[4] => SW[4].IN2
+SW[5] => SW[5].IN2
+SW[6] => SW[6].IN2
+SW[7] => SW[7].IN2
+SW[8] => SW[8].IN1
+HEX0[0] <= part2:p2.HEX0
+HEX0[1] <= part2:p2.HEX0
+HEX0[2] <= part2:p2.HEX0
+HEX0[3] <= part2:p2.HEX0
+HEX0[4] <= part2:p2.HEX0
+HEX0[5] <= part2:p2.HEX0
+HEX0[6] <= part2:p2.HEX0
+HEX1[0] <= part2:p2.HEX1
+HEX1[1] <= part2:p2.HEX1
+HEX1[2] <= part2:p2.HEX1
+HEX1[3] <= part2:p2.HEX1
+HEX1[4] <= part2:p2.HEX1
+HEX1[5] <= part2:p2.HEX1
+HEX1[6] <= part2:p2.HEX1
+HEX4[0] <= numero:n0.saida
+HEX4[1] <= numero:n0.saida
+HEX4[2] <= numero:n0.saida
+HEX4[3] <= numero:n0.saida
+HEX4[4] <= numero:n0.saida
+HEX4[5] <= numero:n0.saida
+HEX4[6] <= numero:n0.saida
+HEX5[0] <= numero:n1.saida
+HEX5[1] <= numero:n1.saida
+HEX5[2] <= numero:n1.saida
+HEX5[3] <= numero:n1.saida
+HEX5[4] <= numero:n1.saida
+HEX5[5] <= numero:n1.saida
+HEX5[6] <= numero:n1.saida
+LEDR[0] <= value[0].DB_MAX_OUTPUT_PORT_TYPE
+LEDR[1] <= value[1].DB_MAX_OUTPUT_PORT_TYPE
+LEDR[2] <= value[2].DB_MAX_OUTPUT_PORT_TYPE
+LEDR[3] <= value[3].DB_MAX_OUTPUT_PORT_TYPE
+LEDR[4] <= value[4].DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part3:p3
+LEDR[0] <= somador:s1.Saida
+LEDR[1] <= somador:s2.Saida
+LEDR[2] <= somador:s3.Saida
+LEDR[3] <= somador:s4.Saida
+LEDR[4] <= somador:s4.Cout
+SW[0] => a[0].IN1
+SW[1] => a[1].IN1
+SW[2] => a[2].IN1
+SW[3] => a[3].IN1
+SW[4] => b[0].IN1
+SW[5] => b[1].IN1
+SW[6] => b[2].IN1
+SW[7] => b[3].IN1
+SW[8] => SW[8].IN1
+
+
+|part4|part3:p3|somador:s1
+A => A.IN1
+B => B.IN2
+Cin => Cin.IN2
+Saida <= xore:Xor2.saida
+Cout <= muxe:mx.saida
+
+
+|part4|part3:p3|somador:s1|xore:Xor1
+x1 => saida.IN0
+x2 => saida.IN1
+saida <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part3:p3|somador:s1|xore:Xor2
+x1 => saida.IN0
+x2 => saida.IN1
+saida <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part3:p3|somador:s1|muxe:mx
+entradax[0] => saida.DATAA
+entradax[1] => saida.DATAA
+entradax[2] => saida.DATAA
+entradax[3] => saida.DATAA
+entraday[0] => saida.DATAB
+entraday[1] => saida.DATAB
+entraday[2] => saida.DATAB
+entraday[3] => saida.DATAB
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+saida[0] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part3:p3|somador:s2
+A => A.IN1
+B => B.IN2
+Cin => Cin.IN2
+Saida <= xore:Xor2.saida
+Cout <= muxe:mx.saida
+
+
+|part4|part3:p3|somador:s2|xore:Xor1
+x1 => saida.IN0
+x2 => saida.IN1
+saida <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part3:p3|somador:s2|xore:Xor2
+x1 => saida.IN0
+x2 => saida.IN1
+saida <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part3:p3|somador:s2|muxe:mx
+entradax[0] => saida.DATAA
+entradax[1] => saida.DATAA
+entradax[2] => saida.DATAA
+entradax[3] => saida.DATAA
+entraday[0] => saida.DATAB
+entraday[1] => saida.DATAB
+entraday[2] => saida.DATAB
+entraday[3] => saida.DATAB
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+saida[0] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part3:p3|somador:s3
+A => A.IN1
+B => B.IN2
+Cin => Cin.IN2
+Saida <= xore:Xor2.saida
+Cout <= muxe:mx.saida
+
+
+|part4|part3:p3|somador:s3|xore:Xor1
+x1 => saida.IN0
+x2 => saida.IN1
+saida <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part3:p3|somador:s3|xore:Xor2
+x1 => saida.IN0
+x2 => saida.IN1
+saida <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part3:p3|somador:s3|muxe:mx
+entradax[0] => saida.DATAA
+entradax[1] => saida.DATAA
+entradax[2] => saida.DATAA
+entradax[3] => saida.DATAA
+entraday[0] => saida.DATAB
+entraday[1] => saida.DATAB
+entraday[2] => saida.DATAB
+entraday[3] => saida.DATAB
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+saida[0] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part3:p3|somador:s4
+A => A.IN1
+B => B.IN2
+Cin => Cin.IN2
+Saida <= xore:Xor2.saida
+Cout <= muxe:mx.saida
+
+
+|part4|part3:p3|somador:s4|xore:Xor1
+x1 => saida.IN0
+x2 => saida.IN1
+saida <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part3:p3|somador:s4|xore:Xor2
+x1 => saida.IN0
+x2 => saida.IN1
+saida <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part3:p3|somador:s4|muxe:mx
+entradax[0] => saida.DATAA
+entradax[1] => saida.DATAA
+entradax[2] => saida.DATAA
+entradax[3] => saida.DATAA
+entraday[0] => saida.DATAB
+entraday[1] => saida.DATAB
+entraday[2] => saida.DATAB
+entraday[3] => saida.DATAB
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+saida[0] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part2:p2
+SW[0] => entrada1[0].IN2
+SW[1] => entrada1[1].IN1
+SW[2] => entrada1[2].IN1
+SW[3] => entrada1[3].IN1
+SW[4] => entrada1[4].IN1
+HEX0[0] <= numero:v0.saida
+HEX0[1] <= numero:v0.saida
+HEX0[2] <= numero:v0.saida
+HEX0[3] <= numero:v0.saida
+HEX0[4] <= numero:v0.saida
+HEX0[5] <= numero:v0.saida
+HEX0[6] <= numero:v0.saida
+HEX1[0] <= numero:v1.saida
+HEX1[1] <= numero:v1.saida
+HEX1[2] <= numero:v1.saida
+HEX1[3] <= numero:v1.saida
+HEX1[4] <= numero:v1.saida
+HEX1[5] <= numero:v1.saida
+HEX1[6] <= numero:v1.saida
+
+
+|part4|part2:p2|muxer:m1
+entradax[0] => saida.DATAA
+entradax[1] => saida.DATAA
+entradax[2] => saida.DATAA
+entradax[3] => saida.DATAA
+entradax[4] => saida.DATAA
+entraday[0] => saida.DATAB
+entraday[1] => saida.DATAB
+entraday[2] => saida.DATAB
+entraday[3] => saida.DATAB
+entraday[4] => saida.DATAB
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+entradaposicao => saida.OUTPUTSELECT
+saida[0] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+saida[4] <= saida.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part2:p2|numero:v0
+entrada[0] => Decoder0.IN4
+entrada[1] => Decoder0.IN3
+entrada[2] => Decoder0.IN2
+entrada[3] => Decoder0.IN1
+entrada[4] => Decoder0.IN0
+saida[0] <= WideOr6.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= WideOr5.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= WideOr4.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= WideOr3.DB_MAX_OUTPUT_PORT_TYPE
+saida[4] <= WideOr2.DB_MAX_OUTPUT_PORT_TYPE
+saida[5] <= WideOr1.DB_MAX_OUTPUT_PORT_TYPE
+saida[6] <= WideOr0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|part2:p2|numero:v1
+entrada[0] => Decoder0.IN4
+entrada[1] => Decoder0.IN3
+entrada[2] => Decoder0.IN2
+entrada[3] => Decoder0.IN1
+entrada[4] => Decoder0.IN0
+saida[0] <= WideOr6.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= WideOr5.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= WideOr4.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= WideOr3.DB_MAX_OUTPUT_PORT_TYPE
+saida[4] <= WideOr2.DB_MAX_OUTPUT_PORT_TYPE
+saida[5] <= WideOr1.DB_MAX_OUTPUT_PORT_TYPE
+saida[6] <= WideOr0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|numero:n0
+entrada[0] => Decoder0.IN4
+entrada[1] => Decoder0.IN3
+entrada[2] => Decoder0.IN2
+entrada[3] => Decoder0.IN1
+entrada[4] => Decoder0.IN0
+saida[0] <= WideOr6.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= WideOr5.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= WideOr4.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= WideOr3.DB_MAX_OUTPUT_PORT_TYPE
+saida[4] <= WideOr2.DB_MAX_OUTPUT_PORT_TYPE
+saida[5] <= WideOr1.DB_MAX_OUTPUT_PORT_TYPE
+saida[6] <= WideOr0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|part4|numero:n1
+entrada[0] => Decoder0.IN4
+entrada[1] => Decoder0.IN3
+entrada[2] => Decoder0.IN2
+entrada[3] => Decoder0.IN1
+entrada[4] => Decoder0.IN0
+saida[0] <= WideOr6.DB_MAX_OUTPUT_PORT_TYPE
+saida[1] <= WideOr5.DB_MAX_OUTPUT_PORT_TYPE
+saida[2] <= WideOr4.DB_MAX_OUTPUT_PORT_TYPE
+saida[3] <= WideOr3.DB_MAX_OUTPUT_PORT_TYPE
+saida[4] <= WideOr2.DB_MAX_OUTPUT_PORT_TYPE
+saida[5] <= WideOr1.DB_MAX_OUTPUT_PORT_TYPE
+saida[6] <= WideOr0.DB_MAX_OUTPUT_PORT_TYPE
+
+

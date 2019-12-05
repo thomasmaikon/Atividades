@@ -1,0 +1,5 @@
+module Clk();
+	logic clk;
+	initial clk= 0;
+	
+endmodule

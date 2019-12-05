@@ -1,0 +1,7 @@
+module muxe(entradax,entraday, entradaposicao, saida);
+			 logic [3:0] entradax, entraday;
+			 logic entradaposicao;
+          logic [3:0] saida;
+   assign saida = entradaposicao ? entraday : entradax;
+	
+endmodule
