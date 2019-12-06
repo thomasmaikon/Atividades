@@ -1,6 +1,0 @@
-module FFT(T,Clk,Clear,Q);
-	input  T,Clk,Clear;
-	output Q;
-
-
-endmodule

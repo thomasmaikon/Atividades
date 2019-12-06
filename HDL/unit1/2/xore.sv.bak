@@ -1,4 +1,0 @@
-module xore(x1,x2,saida);
-		logic x1,x2;
-		saida = x1 ^ x2;
-endmodule
