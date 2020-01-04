@@ -6,15 +6,15 @@
 
 #define HEIGHT 960
 #define WIDTH 540
-#define MAX_LETTER 4
+#define MAX_LETTER 5
 #define SIZE_NAME_DECK 50
 #define SIZE_NAME_LETTER 30
-#define ERRO 0
+#define ERRO -1
 #define SUCCESSFUL 1
 #define IMAGE_SIZE_X 240
 #define IMAGE_SIZE_Y 393
 
-// ======================================Funcoes DE FILAS===================================
+
 typedef struct
 {
 	char name[SIZE_NAME_LETTER];
@@ -27,11 +27,17 @@ typedef struct
 
 typedef struct
 {
-	int start;
 	int end;
 	char  name[SIZE_NAME_DECK];
 	tLetter letter[MAX_LETTER];
 }tDeck;
+
+typedef struct sCard_hand
+{
+	tLetter letter;
+	struct sCard_hand* previous;
+	struct sCard_hand* next;
+}tCard_hand;
 
 typedef struct
 {
@@ -44,19 +50,16 @@ typedef struct
 {
 	int  life; 
 	char  name[SIZE_NAME_DECK];
-	tField field;
-	tDeck deck;
+	tCard_hand* hand;// lista duplamente encadeada para cartas na mao
+	tField field; // fila para os monstros em campo
+	tDeck deck; // pilha do meu baralho
 }tPlayer;
 
-void start(tDeck* deck)
+// ======================================Funcoes DE FILAS===================================
+void start(tField* field)
 {
-	deck->start = -1;
-	deck->end = -1;
-}
-
-int next_deck()
-{
-	
+	field->start = -1;
+	field->end = -1;
 }
 
 tLetter get_letter(char* name,char* defensive,int attack,int defense)
@@ -70,23 +73,28 @@ tLetter get_letter(char* name,char* defensive,int attack,int defense)
 		return letter;
 }
 
-int insert_letter(tDeck* Decks, tLetter letter)
+int insert_letter(tField* field, tLetter letter)
 {
-	int position = (Decks->end+1) % MAX_LETTER;
+	int position = (field->end+1) % MAX_LETTER;
 	
-	if(position == Decks->start)
+	if(position == field->start)
 	{
 		fprintf(stderr,"Fila cheia\n");
 		return ERRO;
 	}
 	
-	if(Decks->start == -1)
+	if(field->start == -1)
 	{
-		Decks->start += 1;
+		field->start += 1;
 	}
 	
-	Decks->end = position;
-	Decks->letter[Decks->end] = letter;
+	field->end = position;
+	field->letter[field->end] = letter;
+	return SUCCESSFUL;
+}
+
+int remove_letter(tDeck* Deck)
+{
 	return SUCCESSFUL;
 }
 
@@ -120,10 +128,91 @@ void set_deck(char* nome,tDeck* deck)
 			++line_position;
 			fgets(line,100,file);	
 
-			insert_letter(deck,get_letter(name,defense_name,attack,defense));	
-		
+			add_stack(deck,get_letter(name,defense_name,attack,defense));	
 		}while(line_position < MAX_LETTER );		
-	}		
+	}	
+}
+// ======================================Funcoes DE pilha===================================
+void start_stack(tDeck* deck)
+{
+	deck->end = -1;
+}
+
+int add_stack(tDeck* deck, tLetter letter)
+{
+	if(deck->end == MAX_LETTER)
+	{
+		fprintf(stderr,"Pilha cheia");
+		return ERRO;
+	}
+	
+	deck->end = deck->end+1;
+	deck->letter[deck->end] = letter;
+	return 1;
+}
+
+int remove_stack(tDeck* deck)
+{
+	if(deck->end == -1)
+	{
+		fprintf(stderr,"Erro, pilha vasia");
+		return ERRO;
+	}
+	deck->end = deck->end-1;
+	return SUCCESSFUL;
+}
+// ======================================Funcoes DE Lista duplamente encadeada ===================================
+tCard_hand* get_card_hand(tLetter letter)
+{
+	tCard_hand* New = (tCard_hand*)calloc(1,sizeof(tCard_hand));
+	
+	New->letter = letter;
+	New->next = NULL;
+	New->previous = NULL;
+	
+	return New;
+}
+
+void add_hand_card(tCard_hand** hand,tLetter letter)
+{
+	tCard_hand* p = *hand;
+	tCard_hand* New = get_card_hand(letter);
+	
+	if(*hand == NULL)
+	{
+		*hand = New;
+	}
+	else
+	{
+		while(p->next != NULL)
+		{	
+			p = p->next;
+		}
+		p->next = New;
+		p->next->previous = p;
+	}
+}
+
+void remove_hand_card(tCard_hand** hand,char* name_card)
+{
+	tCard_hand* p = *hand;
+	while(strcmp(p->letter.name,name_card))
+	{
+		p = p->next;
+	}
+
+	printf("\ncarta encontrada: %s",p->letter.name);
+	
+	printf("\n%s apota para :%s",p->next->letter.name,p->next->next->letter.name);
+	printf("\n%s apota para :%s",p->previous->letter.name,p->previous->next->letter.name);
+
+	p->previous->next = p->next;
+	p->next->previous = p->previous;
+
+	printf("\n%s apota para :%s",p->next->letter.name,p->next->previous->letter.name);
+	printf("\n%s apota para :%s",p->previous->letter.name,p->previous->next->letter.name);
+
+	free(p);
 }
 
 // ======================================Funcoes DE JANELAS===================================
@@ -230,7 +319,7 @@ int home(ALLEGRO_DISPLAY* home_screen){
   	return SUCCESSFUL;
 }
 
-int deck(ALLEGRO_DISPLAY* home_screen,tDeck* deck)
+int Deck(ALLEGRO_DISPLAY* home_screen,tDeck* deck)
 {
 	ALLEGRO_EVENT_QUEUE *queue 	= NULL;
 	ALLEGRO_BITMAP* logo 		= NULL;
@@ -292,6 +381,7 @@ int deck(ALLEGRO_DISPLAY* home_screen,tDeck* deck)
 						play = 1;
 						strcpy(deck->name,"kaiba");
 						set_deck("test.csv",deck);
+						
 					}else if(event.mouse.x >IMAGE_SIZE_X && event.mouse.x <= 2*IMAGE_SIZE_X && event.mouse.y >=0  && event.mouse.y <= IMAGE_SIZE_Y)
 					{
 						play = 1;
@@ -360,8 +450,8 @@ void window_game_field(tField field_player1,tField field_player2)
 	verifica_bitmap(game,"game");
 	al_draw_bitmap(game,0,0,0);
 	
-	monster_field(field_player1,254,562);
-	monster_field(field_player2,254,262);
+//	monster_field(field_player1,254,562);
+	//monster_field(field_player2,254,262);
 	
 }
 //======================================FUNCAO GAME===================================
@@ -369,6 +459,18 @@ void init_game(tPlayer* player,tDeck deck)
 {
 	player->life = 4000;
 	player->deck = deck;
+}
+void start_hand(tPlayer* player)
+{
+	player->hand = NULL;
+	
+	int i;
+	for(i=0;i< 5;++i)
+	{
+		add_hand_card(&player->hand,player->deck.letter[i]);
+		remove_stack(&player->deck);
+	}
+	
 }
 
 // ======================================FUNCAO MAIN===================================
@@ -379,21 +481,40 @@ int main(void)
 	home_screen = window(home_screen,HEIGHT,WIDTH);
 	
 	tDeck deck1,deck2;
-	start(&deck1);
-	start(&deck2);
+	start_stack(&deck1);
+	start_stack(&deck2);
+
 	int play = home(home_screen);
-	int p1 = deck(home_screen,&deck1);
-	int p2 = deck(home_screen,&deck2);
+	int p1 = Deck(home_screen,&deck1);
+	int p2 = Deck(home_screen,&deck2);
 	
 	tPlayer	player[2];
 	init_game(&player[0],deck1);
 	init_game(&player[1],deck2);
 	
 	al_destroy_display(home_screen);
-	
 	home_screen = window(home_screen,960,540);
 	
+	start_hand(&player[0]);// inicia a mao com 5 cartas;
+//	start_hand(&player[1]);
+	
+	
+	
+//	start(&player[0].field); // inicializo a fila de monstros em campo de cada jogador
+//	start(&player[1].field);
+
+	
+	
 	window_game_field(player[0].field,player[1].field);
+	ALLEGRO_BITMAP* test = NULL;
+	int i=0;
+	while(player[0].hand !=NULL){
+		test = al_load_bitmap(player[0].hand->letter.name);
+		al_draw_bitmap(test,0+i*50,0,0);
+		++i;
+		player[0].hand = player[0].hand->next;
+	}
+
 	
 	al_flip_display();
 
