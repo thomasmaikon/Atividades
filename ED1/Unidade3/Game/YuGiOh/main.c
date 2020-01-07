@@ -24,7 +24,6 @@ typedef struct
 	int attack;
 	int defense;
 	char mode[SIZE_NAME_LETTER];
-	
 }tLetter;
 
 typedef struct
@@ -95,12 +94,7 @@ int insert_letter(tField* field, tLetter letter)
 	field->letter[field->end] = letter;
 	return SUCCESSFUL;
 }
-
-int remove_letter(tDeck* Deck)
-{
-	return SUCCESSFUL;
-}
-
+// ======================================Funcoes DE pilha===================================
 void set_deck(char* nome,tDeck* deck)
 {
 
@@ -135,7 +129,7 @@ void set_deck(char* nome,tDeck* deck)
 		}while(line_position < MAX_LETTER );		
 	}	
 }
-// ======================================Funcoes DE pilha===================================
+
 void start_stack(tDeck* deck)
 {
 	deck->end = -1;
@@ -196,26 +190,34 @@ void add_hand_card(tCard_hand** hand,tLetter letter)
 	}
 }
 
-void remove_hand_card(tCard_hand** hand,char* name_card)
+void remove_hand_card(tCard_hand** hand,tCard_hand* card)
 {
 	tCard_hand* p = *hand;
-	while(strcmp(p->letter.name,name_card))
+	
+
+	while(p != card)
 	{
+		fprintf(stderr,"\ncartas diferentes");
 		p = p->next;
 	}
-
-	printf("\ncarta encontrada: %s",p->letter.name);
+	if(p == *hand)
+	{
+		*hand = p->next;	
+	}else
+	{
+		if(p->next != NULL)
+		{
+		p->next->previous = p->previous;
+		}
 	
-	printf("\n%s apota para :%s",p->next->letter.name,p->next->next->letter.name);
-	printf("\n%s apota para :%s",p->previous->letter.name,p->previous->next->letter.name);
-
-	p->previous->next = p->next;
-	p->next->previous = p->previous;
-
-	printf("\n%s apota para :%s",p->next->letter.name,p->next->previous->letter.name);
-	printf("\n%s apota para :%s",p->previous->letter.name,p->previous->next->letter.name);
-
-	free(p);
+		if(p->previous != NULL)
+		{
+			p->previous->next = p->next;
+		}
+	}
+	
+	
+	
 }
 
 // ======================================Funcoes DE JANELAS===================================
@@ -254,7 +256,7 @@ ALLEGRO_DISPLAY* window(ALLEGRO_DISPLAY *home_screen,int x,int y)
 
 int verifica_bitmap(ALLEGRO_BITMAP* bitmap,char* img){
 	if(!bitmap){
-		fprintf(stderr,"A imagem nao Abre %s",img);
+		fprintf(stderr,"\nA imagem nao Abre %s",img);
 		return -1;
 	}
 	return SUCCESSFUL;
@@ -417,46 +419,7 @@ int Deck(ALLEGRO_DISPLAY* home_screen,tDeck* deck)
 	return SUCCESSFUL;
 }
 
-void mode(ALLEGRO_BITMAP* card, int x, int y)
-{
-	al_draw_bitmap(card,x,y,0);
-	al_flip_display();
-}
 
-void monster_field(tField field, int x, int y)
-{
-	if(field.end != -1)
-	{
-		int i;
-		for(i=0;i<=field.end;++i)
-		{
-			ALLEGRO_BITMAP* image_monster = NULL;
-			if(!strcmp(field.letter[i].mode,"attack"))
-			{
-				image_monster = al_load_bitmap(field.letter[i].name);
-				verifica_bitmap(image_monster,"image_monster");
-				mode(image_monster,x+i*100,y);
-			}else
-			{
-				image_monster = al_load_bitmap(field.letter[i].defensive_name);
-				verifica_bitmap(image_monster,"image_monster");
-				mode(image_monster,x+i*100,y);
-			}
-		}
-	}
-}
-
-void window_game_field(tField field_player1,tField field_player2)
-{
-	ALLEGRO_BITMAP* game = NULL;
-	game = al_load_bitmap("game.jpg");
-	verifica_bitmap(game,"game");
-	al_draw_bitmap(game,0,0,0);
-	
-//	monster_field(field_player1,254,562);
-	//monster_field(field_player2,254,262);
-	
-}
 //======================================FUNCAO GAME===================================
 void init_game(tPlayer* player,tDeck deck)
 {
@@ -464,6 +427,7 @@ void init_game(tPlayer* player,tDeck deck)
 	player->deck = deck;
 	player->qtd_hand_card = INIT_HAND_CARD;
 }
+
 void start_hand(tPlayer* player)
 {
 	player->hand = NULL;
@@ -479,41 +443,39 @@ void start_hand(tPlayer* player)
 
 float space_cards(tPlayer player, float space)
 {
-	ALLEGRO_BITMAP* img = NULL;
+		ALLEGRO_BITMAP* img = NULL;
 	
 		img = al_load_bitmap(player.hand->letter.name);
 		verifica_bitmap(img,"img");
-		int range = al_get_bitmap_width(img);
-		int x;
-		x = (space / player.qtd_hand_card);
+	
+		float range = al_get_bitmap_width(img);
+		float x;
+		x = (space / player.qtd_hand_card)- range;
 		return x;
 }
 
-void display_hand_card(tPlayer player, int x, int y)
+void display_hand_card(tPlayer player, float x, float y)
 {
 	ALLEGRO_BITMAP* img = NULL;
 	int i=0;
-	while(player.hand != NULL){
+	int dist = space_cards(player,520);
+	
+	while(player.hand != NULL)
+	{
 		img = al_load_bitmap(player.hand->letter.name);
+		fprintf(stderr,"\n Nome da imagem:%s",player.hand->letter.name);
 		verifica_bitmap(img,"img");
-		al_draw_bitmap(img,x + i*space_cards(player,520),y,0);	
+		al_draw_bitmap(img,x + i*dist,y,0);	
 		player.hand = player.hand->next;
 		++i;
+		x=x+75;
 	}
 	
 	// falta configurar o espacamento das cartas para poder ler a carta e para poder deixal-as organizado
 }
 
-void delay(int i){
-	int x=0;
-	for(x;x<i*10000;++i){
-		x+=1;
-	}
-}
-
-int select_card(tPlayer player,float space_cards,int position_x,int position_y)
+tCard_hand* select_card(tPlayer player,float space_card,float position_x,float position_y)
 {
-	
 	
 	ALLEGRO_EVENT_QUEUE *queue 	= NULL;
 	ALLEGRO_BITMAP* img = NULL;
@@ -530,7 +492,6 @@ int select_card(tPlayer player,float space_cards,int position_x,int position_y)
 	if(!queue)
 	{
 		fprintf(stderr,"Falha ao tentar criar uma Fila de eventos 'queue'");
-  		return ERRO;	 	
 	}
 	
 	//coloca na fila as acoes do mouse
@@ -545,22 +506,128 @@ int select_card(tPlayer player,float space_cards,int position_x,int position_y)
 				
 				if(event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
 				{
-					fprintf(stderr,"\nValor de X: %d", space_cards);
-					if(event.mouse.x >=position_x+(space_cards*i)  && event.mouse.x <=position_x+range_x*i && event.mouse.y >=position_y  && event.mouse.y <=position_y+range_y)           
+					if(event.mouse.x >=position_x+75*i+(space_card*i)  && event.mouse.x <=position_x+75*(i+1)+(space_card*i) && event.mouse.y >=position_y  && event.mouse.y <=position_y+range_y)           
 					{
+						int card=0;
+						while(card != i)
+						{
+							++card;
+							player.hand = player.hand->next;
+						}
 						select = 1;
-						fprintf(stderr,"Deu certo");
 					}
 				}
-				delay(1000);
+				
 				i = (i+1) % player.qtd_hand_card;
 			}
 		 	al_flip_display();
 	}
 	fprintf(stderr,"Deu certo");
-  	return 1;
+	al_destroy_event_queue(queue);
+  	return player.hand ;
 }
 
+void mode(ALLEGRO_BITMAP* card, int x, int y)
+{
+	
+}
+
+void monster_field(tField field, int x, int y)
+{
+	if(field.end != -1)
+	{
+		int i;
+	
+			ALLEGRO_BITMAP* image_monster = NULL;
+				
+			if(!strcmp(field.letter[i].mode,"attack"))
+			{
+				image_monster = al_load_bitmap(field.letter[i].name);
+				verifica_bitmap(image_monster,"image_monster");
+				al_draw_bitmap(image_monster,x,y,0);
+				al_flip_display();
+
+			}else if(!strcmp(field.letter[i].mode,"defensive"))
+			{
+				image_monster = al_load_bitmap(field.letter[i].defensive_name);
+				verifica_bitmap(image_monster,"image_monster");
+				al_draw_bitmap(image_monster,x,y,0);
+				al_flip_display();
+			}
+	}
+}
+
+void window_game_field()
+{
+	ALLEGRO_BITMAP* game = NULL;
+	game = al_load_bitmap("game.jpg");
+	verifica_bitmap(game,"game");
+	al_draw_bitmap(game,0,0,0);	
+}
+
+void select_mode(tCard_hand* hand, tPlayer* player)
+{
+	ALLEGRO_BITMAP* mode_attack = NULL;
+	ALLEGRO_BITMAP* mode_defensive = NULL;
+	ALLEGRO_EVENT_QUEUE *queue 	= NULL;
+	
+	mode_attack = al_load_bitmap("attack.png");
+	verifica_bitmap(mode_attack,"mode_attack");
+	al_draw_bitmap(mode_attack,105,140,0);
+	int attack_x = al_get_bitmap_width(mode_attack);
+	int attack_y = al_get_bitmap_height(mode_attack);
+	
+	
+	mode_defensive = al_load_bitmap("defensive.jpg");
+	verifica_bitmap(mode_defensive,"mode_defensive");
+	al_draw_bitmap(mode_defensive,805,140,0);
+	int defensive_x = al_get_bitmap_width(mode_defensive);
+	int defensive_y = al_get_bitmap_height(mode_defensive);
+	
+	
+	int select = 0;
+	queue = al_create_event_queue();
+	if(!queue)
+	{
+		fprintf(stderr,"Falha ao tentar criar uma Fila de eventos 'queue'");
+	}
+	
+	al_flip_display();
+	
+	//coloca na fila as acoes do mouse
+	al_register_event_source(queue,al_get_mouse_event_source());
+	while(!select)
+	{
+			while(!al_is_event_queue_empty(queue))
+			{
+				ALLEGRO_EVENT event;
+				al_wait_for_event(queue, &event);
+				
+				if(event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+				{
+					if(event.mouse.x >=105  && event.mouse.x <=105+attack_x && event.mouse.y >=140  && event.mouse.y <=140+attack_y)           
+					{
+						insert_letter(&player->field,hand->letter);
+						remove_hand_card(&player->hand,hand);
+						player->qtd_hand_card -=1;
+						strcpy(player->field.letter[player->field.end].mode,"attack");
+						select = 1;
+					}else if(event.mouse.x >=805  && event.mouse.x <=805+defensive_x && event.mouse.y >=140  && event.mouse.y <=140+defensive_y)
+					{
+						insert_letter(&player->field,hand->letter);
+						remove_hand_card(&player->hand,hand);
+						player->qtd_hand_card -=1;
+						strcpy(player->field.letter[player->field.end].mode,"defensive");
+						select = 1;
+					}
+				}
+				
+		
+			}
+		 	al_flip_display();
+	}
+	al_destroy_event_queue(queue);
+}
 // ======================================FUNCAO MAIN===================================
 
 int main(void)
@@ -590,17 +657,23 @@ int main(void)
 	start_hand(&player[0]);// inicia a mao com 5 cartas;
 //	start_hand(&player[1]);
 	
-//	start(&player[0].field); // inicializo a fila de monstros em campo de cada jogador
+	start(&player[0].field); // inicializo a fila de monstros em campo de cada jogador
 //	start(&player[1].field);
 	
 	
-	window_game_field(player[0].field,player[1].field);
+	window_game_field();
+	
 	ALLEGRO_BITMAP* test = NULL;
 
 	display_hand_card(player[0],position_player1[0],position_player1[1]);
-	
-	select_card(player[0],space_cards(player[0],space_card),position_player1[0],position_player1[1]);
 
+	select_mode(select_card(player[0],space_cards(player[0],space_card),position_player1[0],position_player1[1]),&player[0]);
+
+// Renderiza a tela com as cartas em questao
+	window_game_field();
+	monster_field(player[0].field,position_player1[0],position_player1[1]+100);
+	display_hand_card(player[0],position_player1[0],position_player1[1]);
+	
 	al_flip_display();
 
 	
