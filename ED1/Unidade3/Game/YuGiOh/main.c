@@ -13,6 +13,8 @@
 #define SUCCESSFUL 1
 #define IMAGE_SIZE_X 240
 #define IMAGE_SIZE_Y 393
+#define INIT_HAND_CARD 5
+#define INIT_PLAYER_1 
 
 
 typedef struct
@@ -50,6 +52,7 @@ typedef struct
 {
 	int  life; 
 	char  name[SIZE_NAME_DECK];
+	int qtd_hand_card;
 	tCard_hand* hand;// lista duplamente encadeada para cartas na mao
 	tField field; // fila para os monstros em campo
 	tDeck deck; // pilha do meu baralho
@@ -459,18 +462,103 @@ void init_game(tPlayer* player,tDeck deck)
 {
 	player->life = 4000;
 	player->deck = deck;
+	player->qtd_hand_card = INIT_HAND_CARD;
 }
 void start_hand(tPlayer* player)
 {
 	player->hand = NULL;
 	
 	int i;
-	for(i=0;i< 5;++i)
+	for(i=0;i< INIT_HAND_CARD;++i)
 	{
 		add_hand_card(&player->hand,player->deck.letter[i]);
 		remove_stack(&player->deck);
 	}
 	
+}
+
+float space_cards(tPlayer player, float space)
+{
+	ALLEGRO_BITMAP* img = NULL;
+	
+		img = al_load_bitmap(player.hand->letter.name);
+		verifica_bitmap(img,"img");
+		int range = al_get_bitmap_width(img);
+		int x;
+		x = (space / player.qtd_hand_card);
+		return x;
+}
+
+void display_hand_card(tPlayer player, int x, int y)
+{
+	ALLEGRO_BITMAP* img = NULL;
+	int i=0;
+	while(player.hand != NULL){
+		img = al_load_bitmap(player.hand->letter.name);
+		verifica_bitmap(img,"img");
+		al_draw_bitmap(img,x + i*space_cards(player,520),y,0);	
+		player.hand = player.hand->next;
+		++i;
+	}
+	
+	// falta configurar o espacamento das cartas para poder ler a carta e para poder deixal-as organizado
+}
+
+void delay(int i){
+	int x=0;
+	for(x;x<i*10000;++i){
+		x+=1;
+	}
+}
+
+int select_card(tPlayer player,float space_cards,int position_x,int position_y)
+{
+	
+	
+	ALLEGRO_EVENT_QUEUE *queue 	= NULL;
+	ALLEGRO_BITMAP* img = NULL;
+	
+	img = al_load_bitmap(player.hand->letter.name);
+	verifica_bitmap(img,"img");
+	
+	int range_x = al_get_bitmap_width(img);
+	int range_y = al_get_bitmap_height(img);
+	int select=0;
+	al_destroy_bitmap(img);
+	
+	queue = al_create_event_queue();
+	if(!queue)
+	{
+		fprintf(stderr,"Falha ao tentar criar uma Fila de eventos 'queue'");
+  		return ERRO;	 	
+	}
+	
+	//coloca na fila as acoes do mouse
+	al_register_event_source(queue,al_get_mouse_event_source());
+	int i=0;
+	while(!select)
+	{
+			while(!al_is_event_queue_empty(queue))
+			{
+				ALLEGRO_EVENT event;
+				al_wait_for_event(queue, &event);
+				
+				if(event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+				{
+					fprintf(stderr,"\nValor de X: %d", space_cards);
+					if(event.mouse.x >=position_x+(space_cards*i)  && event.mouse.x <=position_x+range_x*i && event.mouse.y >=position_y  && event.mouse.y <=position_y+range_y)           
+					{
+						select = 1;
+						fprintf(stderr,"Deu certo");
+					}
+				}
+				delay(1000);
+				i = (i+1) % player.qtd_hand_card;
+			}
+		 	al_flip_display();
+	}
+	fprintf(stderr,"Deu certo");
+  	return 1;
 }
 
 // ======================================FUNCAO MAIN===================================
@@ -493,29 +581,26 @@ int main(void)
 	init_game(&player[1],deck2);
 	
 	al_destroy_display(home_screen);
-	home_screen = window(home_screen,960,540);
+	home_screen = window(home_screen,HEIGHT,WIDTH);
+	
+		int position_player1[2] = {246,30};
+	 	int position_player2[2] = {246,672};
+		int space_card = 520;
 	
 	start_hand(&player[0]);// inicia a mao com 5 cartas;
 //	start_hand(&player[1]);
 	
-	
-	
 //	start(&player[0].field); // inicializo a fila de monstros em campo de cada jogador
 //	start(&player[1].field);
-
 	
 	
 	window_game_field(player[0].field,player[1].field);
 	ALLEGRO_BITMAP* test = NULL;
-	int i=0;
-	while(player[0].hand !=NULL){
-		test = al_load_bitmap(player[0].hand->letter.name);
-		al_draw_bitmap(test,0+i*50,0,0);
-		++i;
-		player[0].hand = player[0].hand->next;
-	}
 
+	display_hand_card(player[0],position_player1[0],position_player1[1]);
 	
+	select_card(player[0],space_cards(player[0],space_card),position_player1[0],position_player1[1]);
+
 	al_flip_display();
 
 	
