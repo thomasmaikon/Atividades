@@ -4,13 +4,14 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 
-#define HEIGHT 960
-#define WIDTH 540
-#define MAX_LETTER 5
-#define SIZE_NAME_DECK 50
-#define SIZE_NAME_LETTER 30
-#define ERRO -1
-#define SUCCESSFUL 1
+#define HEIGHT 960 // altura
+#define WIDTH 540 // largura
+#define MAX_LETTER_FIELD 3
+#define MAX_LETTER 5 // maximo de cartas que eu vou ler do arquivo .csv
+#define SIZE_NAME_DECK 50 // tamanho do nome de um deck
+#define SIZE_NAME_LETTER 30 // tamanho do nome de uma carta
+#define ERRO 0 // tomar cuidado, anteriormente estava retornando -1
+#define SUCCESSFUL 1 // 
 #define IMAGE_SIZE_X 240
 #define IMAGE_SIZE_Y 393
 #define INIT_HAND_CARD 5
@@ -44,7 +45,7 @@ typedef struct
 {
 	int start;
 	int end;
-	tLetter letter[3];
+	tLetter letter[MAX_LETTER_FIELD];
 }tField;
 
 typedef struct
@@ -77,13 +78,15 @@ tLetter get_letter(char* name,char* defensive,int attack,int defense)
 
 int insert_letter(tField* field, tLetter letter)
 {
-	int position = (field->end+1) % MAX_LETTER;
+	int position = (field->end+1) % MAX_LETTER_FIELD;
 	
 	if(position == field->start)
 	{
-		fprintf(stderr,"Fila cheia\n");
+		fprintf(stderr,"\nFila cheia\n");
 		return ERRO;
 	}
+	
+		fprintf(stderr,"\nInserindo Carta\n");
 	
 	if(field->start == -1)
 	{
@@ -197,7 +200,7 @@ void remove_hand_card(tCard_hand** hand,tCard_hand* card)
 
 	while(p != card)
 	{
-		fprintf(stderr,"\ncartas diferentes");
+		fprintf(stderr,"\nProcurando Carta ...");
 		p = p->next;
 	}
 	if(p == *hand)
@@ -463,7 +466,6 @@ void display_hand_card(tPlayer player, float x, float y)
 	while(player.hand != NULL)
 	{
 		img = al_load_bitmap(player.hand->letter.name);
-		fprintf(stderr,"\n Nome da imagem:%s",player.hand->letter.name);
 		verifica_bitmap(img,"img");
 		al_draw_bitmap(img,x + i*dist,y,0);	
 		player.hand = player.hand->next;
@@ -471,6 +473,7 @@ void display_hand_card(tPlayer player, float x, float y)
 		x=x+75;
 	}
 	
+	fprintf(stderr,"\n Cartas Da mao exibidas");
 	// falta configurar o espacamento das cartas para poder ler a carta e para poder deixal-as organizado
 }
 
@@ -522,7 +525,7 @@ tCard_hand* select_card(tPlayer player,float space_card,float position_x,float p
 			}
 		 	al_flip_display();
 	}
-	fprintf(stderr,"Deu certo");
+	fprintf(stderr,"\n Carta Selecionada");
 	al_destroy_event_queue(queue);
   	return player.hand ;
 }
@@ -534,26 +537,28 @@ void mode(ALLEGRO_BITMAP* card, int x, int y)
 
 void monster_field(tField field, int x, int y)
 {
-	if(field.end != -1)
-	{
-		int i;
+	ALLEGRO_BITMAP* image_monster = NULL;
 	
-			ALLEGRO_BITMAP* image_monster = NULL;
-				
+	int i=0;
+	while(i<=field.end)
+	{
+	
+			fprintf(stderr,"\nExibindo Carta");
 			if(!strcmp(field.letter[i].mode,"attack"))
 			{
 				image_monster = al_load_bitmap(field.letter[i].name);
 				verifica_bitmap(image_monster,"image_monster");
-				al_draw_bitmap(image_monster,x,y,0);
+				al_draw_bitmap(image_monster,x + i*100,y,0);
 				al_flip_display();
-
+				
 			}else if(!strcmp(field.letter[i].mode,"defensive"))
 			{
 				image_monster = al_load_bitmap(field.letter[i].defensive_name);
 				verifica_bitmap(image_monster,"image_monster");
-				al_draw_bitmap(image_monster,x,y,0);
+				al_draw_bitmap(image_monster,x + i*100,y,0);
 				al_flip_display();
 			}
+	++i;
 	}
 }
 
@@ -607,18 +612,24 @@ void select_mode(tCard_hand* hand, tPlayer* player)
 				{
 					if(event.mouse.x >=105  && event.mouse.x <=105+attack_x && event.mouse.y >=140  && event.mouse.y <=140+attack_y)           
 					{
-						insert_letter(&player->field,hand->letter);
-						remove_hand_card(&player->hand,hand);
-						player->qtd_hand_card -=1;
-						strcpy(player->field.letter[player->field.end].mode,"attack");
-						select = 1;
+						if(insert_letter(&player->field,hand->letter)){
+							remove_hand_card(&player->hand,hand);
+							player->qtd_hand_card -=1;
+							strcpy(player->field.letter[player->field.end].mode,"attack");
+							select = 1;
+						}else{
+							break;
+						}
 					}else if(event.mouse.x >=805  && event.mouse.x <=805+defensive_x && event.mouse.y >=140  && event.mouse.y <=140+defensive_y)
 					{
-						insert_letter(&player->field,hand->letter);
-						remove_hand_card(&player->hand,hand);
-						player->qtd_hand_card -=1;
-						strcpy(player->field.letter[player->field.end].mode,"defensive");
-						select = 1;
+						if(insert_letter(&player->field,hand->letter)){
+							remove_hand_card(&player->hand,hand);
+							player->qtd_hand_card -=1;
+							strcpy(player->field.letter[player->field.end].mode,"defensive");
+							select = 1;	
+						}else{
+							break;
+						}
 					}
 				}
 				
@@ -650,33 +661,35 @@ int main(void)
 	al_destroy_display(home_screen);
 	home_screen = window(home_screen,HEIGHT,WIDTH);
 	
-		int position_player1[2] = {246,30};
+		int position_player1[2] = {246,30}; // posicao aonde ficam as cartas do jogador 
 	 	int position_player2[2] = {246,672};
-		int space_card = 520;
+	 	
+		int space_card = 520; // espacamento entre as cartas
 	
 	start_hand(&player[0]);// inicia a mao com 5 cartas;
-//	start_hand(&player[1]);
+	start_hand(&player[1]);
 	
 	start(&player[0].field); // inicializo a fila de monstros em campo de cada jogador
-//	start(&player[1].field);
+	start(&player[1].field);
 	
 	
 	window_game_field();
 	
 	ALLEGRO_BITMAP* test = NULL;
-
-	display_hand_card(player[0],position_player1[0],position_player1[1]);
-
-	select_mode(select_card(player[0],space_cards(player[0],space_card),position_player1[0],position_player1[1]),&player[0]);
+	
+	while(1){
+	
+	display_hand_card(player[0],position_player1[0],position_player1[1]);// Exibe cartas de cada jogador da mao
+	//display_hand_card(player[1],position_player2[0],position_player2[1]);
+	
+	
+	select_mode(select_card(player[0],space_cards(player[0],space_card),position_player1[0],position_player1[1]),&player[0]); //Seleciona carta e define seu modo
 
 // Renderiza a tela com as cartas em questao
 	window_game_field();
 	monster_field(player[0].field,position_player1[0],position_player1[1]+100);
-	display_hand_card(player[0],position_player1[0],position_player1[1]);
-	
+	}
 	al_flip_display();
-
 	
 	while(1);
-
 }
