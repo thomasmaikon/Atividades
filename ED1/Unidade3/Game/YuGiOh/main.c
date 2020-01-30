@@ -570,7 +570,7 @@ void window_game_field()
 	al_draw_bitmap(game,0,0,0);	
 }
 
-void select_mode(tCard_hand* hand, tPlayer* player)
+int select_mode(tCard_hand* hand, tPlayer* player)
 {
 	ALLEGRO_BITMAP* mode_attack = NULL;
 	ALLEGRO_BITMAP* mode_defensive = NULL;
@@ -618,7 +618,7 @@ void select_mode(tCard_hand* hand, tPlayer* player)
 							strcpy(player->field.letter[player->field.end].mode,"attack");
 							select = 1;
 						}else{
-							break;
+							return ERRO;
 						}
 					}else if(event.mouse.x >=805  && event.mouse.x <=805+defensive_x && event.mouse.y >=140  && event.mouse.y <=140+defensive_y)
 					{
@@ -628,7 +628,7 @@ void select_mode(tCard_hand* hand, tPlayer* player)
 							strcpy(player->field.letter[player->field.end].mode,"defensive");
 							select = 1;	
 						}else{
-							break;
+							return ERRO;
 						}
 					}
 				}
@@ -638,6 +638,12 @@ void select_mode(tCard_hand* hand, tPlayer* player)
 		 	al_flip_display();
 	}
 	al_destroy_event_queue(queue);
+	return SUCCESSFUL;
+}
+
+int battle(tPlayer* player)
+{
+	
 }
 // ======================================FUNCAO MAIN===================================
 
@@ -653,7 +659,7 @@ int main(void)
 	int play = home(home_screen);
 	int p1 = Deck(home_screen,&deck1);
 	int p2 = Deck(home_screen,&deck2);
-	
+	int round = 0;
 	tPlayer	player[2];
 	init_game(&player[0],deck1);
 	init_game(&player[1],deck2);
@@ -662,7 +668,7 @@ int main(void)
 	home_screen = window(home_screen,HEIGHT,WIDTH);
 	
 		int position_player1[2] = {246,30}; // posicao aonde ficam as cartas do jogador 
-	 	int position_player2[2] = {246,672};
+	 	int position_player2[2] = {246,372};
 	 	
 		int space_card = 520; // espacamento entre as cartas
 	
@@ -680,16 +686,39 @@ int main(void)
 	while(1){
 	
 	display_hand_card(player[0],position_player1[0],position_player1[1]);// Exibe cartas de cada jogador da mao
-	//display_hand_card(player[1],position_player2[0],position_player2[1]);
+	display_hand_card(player[1],position_player2[0],position_player2[1]);
 	
-	
-	select_mode(select_card(player[0],space_cards(player[0],space_card),position_player1[0],position_player1[1]),&player[0]); //Seleciona carta e define seu modo
 
-// Renderiza a tela com as cartas em questao
+// Renderiza a tela com as cartas em questao	
+	select_mode(select_card(player[0],space_cards(player[0],space_card),position_player1[0],position_player1[1]),&player[0]); //Seleciona carta e define seu modo
 	window_game_field();
 	monster_field(player[0].field,position_player1[0],position_player1[1]+100);
-	}
+	monster_field(player[1].field,position_player2[0],position_player2[1]-100);
+	display_hand_card(player[0],position_player1[0],position_player1[1]);// Exibe cartas de cada jogador da mao
+	display_hand_card(player[1],position_player2[0],position_player2[1]);
 	al_flip_display();
+	
+		if(round > 1){
+			//battle(&player[0]);	
+		}
+		++round;
+	
+	select_mode(select_card(player[1],space_cards(player[1],space_card),position_player2[0],position_player2[1]),&player[1]);
+	window_game_field();
+	monster_field(player[1].field,position_player2[0],position_player2[1]-100);
+	monster_field(player[0].field,position_player1[0],position_player1[1]+100);
+	display_hand_card(player[1],position_player2[0],position_player2[1]);
+	al_flip_display();
+	
+	
+		if(round > 1){
+			//battle(&player[1]);	
+		}
+		++round;
+	
+	
+	}
+	
 	
 	while(1);
 }
