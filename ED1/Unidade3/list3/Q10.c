@@ -13,17 +13,8 @@ void start(tDado* dado,int id,char nome[]){
 }
 
 
-void shell_sort(tDado dado[], int size){
-    int metade = size/2;
-    for(; metade > 0 ; metade = metade/2){
-        for(int i=0; i+metade <= size ;++i){
-            if (dado[i].id >= dado[i+metade].id){
-                int buffer = dado[i].id;
-                dado[i].id = dado[i+metade].id;
-                dado[i+metade].id = buffer;
-            }
-        }
-    }
+void quick_sort(tDado dado[], int size){
+    
 }
 
 int main(){
@@ -42,7 +33,7 @@ int main(){
         printf(" -> id:%d ",dado[i].id);
     }
 
-    shell_sort(dado,5);
+    quick_sort(dado,5);
 
     printf("\nVetor Ordenado: ");
     for(int i = 0; i < 5; ++i){

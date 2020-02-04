@@ -79,7 +79,7 @@ tLetter get_letter(char* name,char* defensive,int attack,int defense)
 
 int insert_letter(tField* field, tLetter letter)
 {
-	int position = (field->end+1) % MAX_LETTER_FIELD;
+	int position = (field->start+1) % MAX_LETTER_FIELD;
 	
 	if(position == field->start)
 	{
@@ -87,27 +87,41 @@ int insert_letter(tField* field, tLetter letter)
 		return ERRO;
 	}
 	
-		fprintf(stderr,"\nInserindo Carta\n");
+	//	fprintf(stderr,"\nInserindo Carta\n");
 	
 	if(field->start == -1)
 	{
 		field->start += 1;
 	}
 	
-	field->end = position;
+	field->end = field->end +1;
 	field->letter[field->end] = letter;
 	return SUCCESSFUL;
 }
 
 int remove_letter_field(tField* field,tLetter letter){
 	int i=0;
-	fprintf(stderr,"\nCarta desejada %s",letter.name);
-	
-	while(!strcmp(field->letter[i].name, letter.name)){
-		fprintf(stderr,"\nCartas encontradas %s",field->letter[i].name);	
+	int k=0;
+	while(i <= field->end){
+		fprintf(stderr,"\n%d",i);
+		if(!strcmp(letter.name,field->letter[i].name)){
+			fprintf(stderr,"\ncarta -> %s",field->letter[i].name);
+			k = 1;
+		}
+		if(k = 1){
+				fprintf(stderr,"\n%d  == %d",i,field->end);
+			if(i == field->end ){
+			//	fprintf(stderr,"Nao faz nada");
+			}else{
+			//	fprintf(stderr,"faz algo");
+				field->letter[i] = field->letter[i+1];	
+			}
+				
+		}
 		++i;
 	}
-	fprintf(stderr,"\nCarta encontrada %s",field->letter[i].name);
+
+	field->end = field->end-1;
 	return SUCCESSFUL;
 }
 
@@ -217,6 +231,8 @@ void remove_hand_card(tCard_hand** hand,tCard_hand* card)
 	//	fprintf(stderr,"\nProcurando Carta ...");
 		p = p->next;
 	}
+	
+	//	fprintf(stderr,"\ncarta encontrada: %s carta esperada :%s",p->letter.name,card->letter.name );
 	if(p == *hand)
 	{
 		*hand = p->next;	
@@ -565,14 +581,14 @@ void monster_field(tPlayer player, int adicional)
 	while(i<=field.end)
 	{
 	
-		//	fprintf(stderr,"\nExibindo Carta");
+			fprintf(stderr,"\nExibindo Carta");
+			fprintf(stderr,"\n ->Carta:%s",field.letter[i].name);
 			if(!strcmp(field.letter[i].mode,"attack"))
 			{
 				image_monster = al_load_bitmap(field.letter[i].name);
 				verifica_bitmap(image_monster,"image_monster");
 				al_draw_bitmap(image_monster,x + i*150,y,0);
 				al_flip_display();
-				
 			}else if(!strcmp(field.letter[i].mode,"defensive"))
 			{
 				image_monster = al_load_bitmap(field.letter[i].defensive_name);
@@ -666,7 +682,7 @@ int select_mode(tCard_hand* hand, tPlayer* player)
 tLetter select_card_filed(tPlayer player,int adicional)
 {
 	
-	fprintf(stderr,"\nSelecione sua carta do campo");
+	//fprintf(stderr,"\nSelecione sua carta do campo");
 	tLetter letter;
 	
 	ALLEGRO_EVENT_QUEUE* queue 	= NULL;
@@ -716,7 +732,6 @@ tLetter select_card_filed(tPlayer player,int adicional)
 	
 	al_destroy_event_queue(queue);
 	al_destroy_bitmap(img);
-	fprintf(stderr,"\n%s",letter.name);
   	return letter;
 }
 
@@ -731,18 +746,102 @@ int battle(tLetter attack,tLetter attacked, tPlayer* atacante, tPlayer* defensor
 	}
 	
 	int result = (attack.attack - value);
-	fprintf(stderr,"\nvalor da diferenca: %d",result);
 	
-	if(result <= 0 ){
+	if(result < 0 ){
 		remove_letter_field(&atacante->field,attack);
 		atacante->life = atacante->life + result;
 	}else if(result > 0){
 		remove_letter_field(&defensor->field,attacked);
 		defensor->life = defensor->life - result;
+	}else{
+		remove_letter_field(&atacante->field,attack);
+		atacante->life = atacante->life + result;
+		remove_letter_field(&defensor->field,attacked);
+		defensor->life = defensor->life - result;
 	}
-	fprintf(stderr,"\nResultado da luta");
-	fprintf(stderr,"\nVida p1:%d vida p2:%d",atacante->life,defensor->life);
+
 	return SUCCESSFUL;
+}
+tLetter best_letter_bot(tPlayer player){
+	tLetter letter;
+	letter.attack = 0;
+	letter.defense = 0;
+	int i;
+	for(i=0;i<=player.field.end;++i){
+		if((player.field.letter[i].attack+player.field.letter[i].defense) > (letter.attack+letter.defense))	{
+			letter = player.field.letter[i];
+		}
+	}
+	
+	return letter;
+}
+tLetter most_letter_bot(tPlayer player){
+	tLetter letter = player.field.letter[0];
+	int i=0;
+
+	while(i<=player.field.end)
+	{
+		if((player.field.letter[i].attack+player.field.letter[i].defense) < (letter.attack+letter.defense))	{
+			
+			letter = player.field.letter[i];
+		}
+		++i;
+	}
+	return letter;
+}
+tLetter select_letter_bot(tPlayer player){
+	tLetter letter;
+	letter.attack = 0;
+	letter.defense = 0;
+
+	while(player.hand!=NULL){
+		if((player.hand->letter.attack+player.hand->letter.defense) > (letter.attack+letter.defense))
+		{
+			letter = player.hand->letter;
+		}
+		player.hand = player.hand->next;
+	}
+	
+	return letter;
+}
+
+tCard_hand* remove_letter_bot(tPlayer player,tLetter letter){
+	while((player.hand->letter.attack+player.hand->letter.defense) != (letter.attack+letter.defense)){
+	//	fprintf(stderr,"\n -->Carta encontrada %s",player.hand->letter.name);
+		player.hand = player.hand->next;
+	}
+//	fprintf(stderr,"\n -->Carta encontrada %s",player.hand->letter.name);
+	return player.hand;
+}
+
+void bot(tPlayer* p1,tPlayer* bot){
+
+	
+	if(bot->field.end < 0){
+		tLetter best = select_letter_bot(*bot);
+		tCard_hand* remove = remove_letter_bot(*bot,best);
+		if(best.attack >= best.defense){
+			if(insert_letter(&bot->field,best)){
+				remove_hand_card(&bot->hand,remove);
+				bot->qtd_hand_card -=1;
+				strcpy(bot->field.letter[bot->field.end].mode,"attack");
+			}
+		}else{
+			if(insert_letter(&bot->field,best)){
+				remove_hand_card(&bot->hand,bot->hand);
+				bot->qtd_hand_card -=1;
+				strcpy(bot->field.letter[bot->field.end].mode,"defensive");
+			}
+		}
+		//fprintf(stderr,"\nsetando carta do bot");
+	}
+	if(bot->field.end >=0){
+			tLetter best = best_letter_bot(*bot);
+			tLetter most = best_letter_bot(*p1);
+			
+			
+			battle(best,most,bot,p1);
+	}
 }
 // ======================================FUNCAO MAIN===================================
 
@@ -810,7 +909,8 @@ int main(void)
 		}
 		++round;
 	
-	select_mode(select_card(player[1],space_cards(player[1],space_card),0),&player[1]);
+	bot(&player[0],&player[1]);
+	//fprintf(stderr,"\n %s",player[1].field.letter[player[1].field.end].name);
 	window_game_field();
 	monster_field(player[0],+115);
 	monster_field(player[1],-115);
@@ -819,5 +919,5 @@ int main(void)
 	
 
 	}
-	
+	while(1);
 }
