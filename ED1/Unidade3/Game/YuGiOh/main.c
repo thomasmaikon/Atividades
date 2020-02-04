@@ -17,7 +17,6 @@
 #define INIT_HAND_CARD 5
 #define INIT_PLAYER_1 
 
-
 typedef struct
 {
 	char name[SIZE_NAME_LETTER];
@@ -56,6 +55,8 @@ typedef struct
 	tCard_hand* hand;// lista duplamente encadeada para cartas na mao
 	tField field; // fila para os monstros em campo
 	tDeck deck; // pilha do meu baralho
+	
+	float position[2];
 }tPlayer;
 
 // ======================================Funcoes DE FILAS===================================
@@ -97,6 +98,19 @@ int insert_letter(tField* field, tLetter letter)
 	field->letter[field->end] = letter;
 	return SUCCESSFUL;
 }
+
+int remove_letter_field(tField* field,tLetter letter){
+	int i=0;
+	fprintf(stderr,"\nCarta desejada %s",letter.name);
+	
+	while(!strcmp(field->letter[i].name, letter.name)){
+		fprintf(stderr,"\nCartas encontradas %s",field->letter[i].name);	
+		++i;
+	}
+	fprintf(stderr,"\nCarta encontrada %s",field->letter[i].name);
+	return SUCCESSFUL;
+}
+
 // ======================================Funcoes DE pilha===================================
 void set_deck(char* nome,tDeck* deck)
 {
@@ -200,7 +214,7 @@ void remove_hand_card(tCard_hand** hand,tCard_hand* card)
 
 	while(p != card)
 	{
-		fprintf(stderr,"\nProcurando Carta ...");
+	//	fprintf(stderr,"\nProcurando Carta ...");
 		p = p->next;
 	}
 	if(p == *hand)
@@ -424,11 +438,13 @@ int Deck(ALLEGRO_DISPLAY* home_screen,tDeck* deck)
 
 
 //======================================FUNCAO GAME===================================
-void init_game(tPlayer* player,tDeck deck)
+void init_game(tPlayer* player,tDeck deck,float px,float py)
 {
 	player->life = 4000;
 	player->deck = deck;
 	player->qtd_hand_card = INIT_HAND_CARD;
+	player->position[0] = px;
+	player->position[1] = py;
 }
 
 void start_hand(tPlayer* player)
@@ -457,10 +473,12 @@ float space_cards(tPlayer player, float space)
 		return x;
 }
 
-void display_hand_card(tPlayer player, float x, float y)
+void display_hand_card(tPlayer player)
 {
 	ALLEGRO_BITMAP* img = NULL;
 	int i=0;
+	float x = player.position[0]; 
+	float y = player.position[1];
 	int dist = space_cards(player,520);
 	
 	while(player.hand != NULL)
@@ -473,21 +491,25 @@ void display_hand_card(tPlayer player, float x, float y)
 		x=x+75;
 	}
 	
-	fprintf(stderr,"\n Cartas Da mao exibidas");
+//	fprintf(stderr,"\n Cartas Da mao exibidas");
 	// falta configurar o espacamento das cartas para poder ler a carta e para poder deixal-as organizado
 }
 
-tCard_hand* select_card(tPlayer player,float space_card,float position_x,float position_y)
+tCard_hand* select_card(tPlayer player,float space_card,int adicional)
 {
-	
+
 	ALLEGRO_EVENT_QUEUE *queue 	= NULL;
 	ALLEGRO_BITMAP* img = NULL;
 	
 	img = al_load_bitmap(player.hand->letter.name);
 	verifica_bitmap(img,"img");
 	
-	int range_x = al_get_bitmap_width(img);
+	int range_x = al_get_bitmap_width(img); // pega largura e altura de uma imagem
 	int range_y = al_get_bitmap_height(img);
+	
+	float position_x = player.position[0]; // pega a posição em que as imagens vao ficar
+	float position_y = player.position[1] + adicional;
+	
 	int select=0;
 	al_destroy_bitmap(img);
 	
@@ -525,37 +547,37 @@ tCard_hand* select_card(tPlayer player,float space_card,float position_x,float p
 			}
 		 	al_flip_display();
 	}
-	fprintf(stderr,"\n Carta Selecionada");
+	//fprintf(stderr,"\n Carta Selecionada");
 	al_destroy_event_queue(queue);
   	return player.hand ;
 }
 
-void mode(ALLEGRO_BITMAP* card, int x, int y)
-{
-	
-}
-
-void monster_field(tField field, int x, int y)
+void monster_field(tPlayer player, int adicional)
 {
 	ALLEGRO_BITMAP* image_monster = NULL;
-	
+
+	tField field = player.field;
+
 	int i=0;
+	int x = player.position[0];
+	int y = player.position[1] + adicional;
+	
 	while(i<=field.end)
 	{
 	
-			fprintf(stderr,"\nExibindo Carta");
+		//	fprintf(stderr,"\nExibindo Carta");
 			if(!strcmp(field.letter[i].mode,"attack"))
 			{
 				image_monster = al_load_bitmap(field.letter[i].name);
 				verifica_bitmap(image_monster,"image_monster");
-				al_draw_bitmap(image_monster,x + i*100,y,0);
+				al_draw_bitmap(image_monster,x + i*150,y,0);
 				al_flip_display();
 				
 			}else if(!strcmp(field.letter[i].mode,"defensive"))
 			{
 				image_monster = al_load_bitmap(field.letter[i].defensive_name);
 				verifica_bitmap(image_monster,"image_monster");
-				al_draw_bitmap(image_monster,x + i*100,y,0);
+				al_draw_bitmap(image_monster,x + i*150,y+20,0);
 				al_flip_display();
 			}
 	++i;
@@ -641,9 +663,86 @@ int select_mode(tCard_hand* hand, tPlayer* player)
 	return SUCCESSFUL;
 }
 
-int battle(tPlayer* player)
+tLetter select_card_filed(tPlayer player,int adicional)
 {
 	
+	fprintf(stderr,"\nSelecione sua carta do campo");
+	tLetter letter;
+	
+	ALLEGRO_EVENT_QUEUE* queue 	= NULL;
+	ALLEGRO_BITMAP* img = NULL;
+	
+	img = al_load_bitmap(player.hand->letter.name);
+	verifica_bitmap(img,"select_card_field");
+	
+	int range_x = al_get_bitmap_width(img); // pega largura e altura de uma imagem
+	int range_y = al_get_bitmap_height(img);
+	
+	float position_x = player.position[0]; // pega a posição em que as imagens vao ficar
+	float position_y = player.position[1] + adicional;
+	
+	int select=0;
+	
+	
+	queue = al_create_event_queue();
+	if(!queue)
+	{
+		fprintf(stderr,"Falha ao tentar criar uma Fila de eventos 'queue'");
+	}
+	
+	//coloca na fila as acoes do mouse
+	al_register_event_source(queue,al_get_mouse_event_source());
+	int i=0;
+	while(!select)
+	{
+			while(!al_is_event_queue_empty(queue))
+			{
+				ALLEGRO_EVENT event;
+				al_wait_for_event(queue, &event);
+				
+				if(event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+				{
+					if(event.mouse.x >=position_x+75*i+(75*i)  && event.mouse.x <=position_x+75*(i+1)+(75*i) && event.mouse.y >=position_y  && event.mouse.y <=position_y+range_y)           
+					{
+						letter = player.field.letter[i];
+						select = 1;
+					}
+				}
+				
+				i = (i+1) % (player.field.end+1);
+			}
+		 	al_flip_display();
+	}
+	
+	al_destroy_event_queue(queue);
+	al_destroy_bitmap(img);
+	fprintf(stderr,"\n%s",letter.name);
+  	return letter;
+}
+
+int battle(tLetter attack,tLetter attacked, tPlayer* atacante, tPlayer* defensor){
+	
+	int value;
+	
+	if(!strcmp(attacked.mode,"defensive")){
+		value = attacked.defense;
+	}else{
+		value = attacked.attack;
+	}
+	
+	int result = (attack.attack - value);
+	fprintf(stderr,"\nvalor da diferenca: %d",result);
+	
+	if(result <= 0 ){
+		remove_letter_field(&atacante->field,attack);
+		atacante->life = atacante->life + result;
+	}else if(result > 0){
+		remove_letter_field(&defensor->field,attacked);
+		defensor->life = defensor->life - result;
+	}
+	fprintf(stderr,"\nResultado da luta");
+	fprintf(stderr,"\nVida p1:%d vida p2:%d",atacante->life,defensor->life);
+	return SUCCESSFUL;
 }
 // ======================================FUNCAO MAIN===================================
 
@@ -659,66 +758,66 @@ int main(void)
 	int play = home(home_screen);
 	int p1 = Deck(home_screen,&deck1);
 	int p2 = Deck(home_screen,&deck2);
-	int round = 0;
+	int round = 1;
+	int space_card = 520; // espacamento para as cartas
+	
 	tPlayer	player[2];
-	init_game(&player[0],deck1);
-	init_game(&player[1],deck2);
-	
-	al_destroy_display(home_screen);
-	home_screen = window(home_screen,HEIGHT,WIDTH);
-	
-		int position_player1[2] = {246,30}; // posicao aonde ficam as cartas do jogador 
-	 	int position_player2[2] = {246,372};
-	 	
-		int space_card = 520; // espacamento entre as cartas
+
+	init_game(&player[0],deck1, 246,20);
+	init_game(&player[1],deck2,246,362);
 	
 	start_hand(&player[0]);// inicia a mao com 5 cartas;
 	start_hand(&player[1]);
 	
 	start(&player[0].field); // inicializo a fila de monstros em campo de cada jogador
 	start(&player[1].field);
+
+	al_destroy_display(home_screen);
+	home_screen = window(home_screen,HEIGHT,WIDTH);
 	
+
 	
 	window_game_field();
 	
 	ALLEGRO_BITMAP* test = NULL;
+	int ganhador = 0;
+	while(!ganhador){
 	
-	while(1){
-	
-	display_hand_card(player[0],position_player1[0],position_player1[1]);// Exibe cartas de cada jogador da mao
-	display_hand_card(player[1],position_player2[0],position_player2[1]);
+	display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
+	display_hand_card(player[1]);
 	
 
 // Renderiza a tela com as cartas em questao	
-	select_mode(select_card(player[0],space_cards(player[0],space_card),position_player1[0],position_player1[1]),&player[0]); //Seleciona carta e define seu modo
+	select_mode(select_card(player[0],space_cards(player[0],space_card),0),&player[0]); //Seleciona carta e define seu modo
 	window_game_field();
-	monster_field(player[0].field,position_player1[0],position_player1[1]+100);
-	monster_field(player[1].field,position_player2[0],position_player2[1]-100);
-	display_hand_card(player[0],position_player1[0],position_player1[1]);// Exibe cartas de cada jogador da mao
-	display_hand_card(player[1],position_player2[0],position_player2[1]);
+	monster_field(player[0],+115);
+	monster_field(player[1],-115);
+	display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
+	display_hand_card(player[1]);
 	al_flip_display();
 	
 		if(round > 1){
-			//battle(&player[0]);	
+			tLetter atacador = select_card_filed(player[0],+115);
+			tLetter atacado = select_card_filed(player[1],-115);
+			battle(atacador,atacado,&player[0],&player[1]);	
+			
+			window_game_field();
+			monster_field(player[0],+115);
+			monster_field(player[1],-115);
+			display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
+			display_hand_card(player[1]);
+			al_flip_display();
 		}
 		++round;
 	
-	select_mode(select_card(player[1],space_cards(player[1],space_card),position_player2[0],position_player2[1]),&player[1]);
+	select_mode(select_card(player[1],space_cards(player[1],space_card),0),&player[1]);
 	window_game_field();
-	monster_field(player[1].field,position_player2[0],position_player2[1]-100);
-	monster_field(player[0].field,position_player1[0],position_player1[1]+100);
-	display_hand_card(player[1],position_player2[0],position_player2[1]);
+	monster_field(player[0],+115);
+	monster_field(player[1],-115);
+	display_hand_card(player[1]);
 	al_flip_display();
 	
-	
-		if(round > 1){
-			//battle(&player[1]);	
-		}
-		++round;
-	
-	
+
 	}
 	
-	
-	while(1);
 }
