@@ -804,14 +804,73 @@ void bot(tPlayer* p1,tPlayer* bot){
 		}
 		//fprintf(stderr,"\nsetando carta do bot");
 	}
-	fprintf(stderr,"\n quantidade de cartas %d",bot->qtd_field_card);
-	if(bot->qtd_field_card >=1){
+
+	if(bot->field != NULL){
 			tLinked_list* best = best_letter_field_bot(*bot);
-			tLinked_list* most = best_letter_field_bot(*p1);
+			tLinked_list* most = most_letter_field_bot(*p1);
 			
 			battle(best,most,bot,p1);
 	}
 	
+}
+void mod(tLinked_list* letter){
+	
+	ALLEGRO_BITMAP* mode_attack = NULL;
+	ALLEGRO_BITMAP* mode_defensive = NULL;
+	ALLEGRO_EVENT_QUEUE *queue 	= NULL;
+	
+	mode_attack = al_load_bitmap("attack.png");
+	verifica_bitmap(mode_attack,"mode_attack");
+	al_draw_bitmap(mode_attack,105,140,0);
+	int attack_x = al_get_bitmap_width(mode_attack);
+	int attack_y = al_get_bitmap_height(mode_attack);
+	
+	
+	mode_defensive = al_load_bitmap("defensive.jpg");
+	verifica_bitmap(mode_defensive,"mode_defensive");
+	al_draw_bitmap(mode_defensive,805,140,0);
+	int defensive_x = al_get_bitmap_width(mode_defensive);
+	int defensive_y = al_get_bitmap_height(mode_defensive);
+	
+	
+	int select = 0;
+	queue = al_create_event_queue();
+	if(!queue)
+	{
+		fprintf(stderr,"Falha ao tentar criar uma Fila de eventos 'queue'");
+	}
+	
+	al_flip_display();
+	
+	//coloca na fila as acoes do mouse
+	al_register_event_source(queue,al_get_mouse_event_source());
+	while(!select)
+	{
+			while(!al_is_event_queue_empty(queue))
+			{
+				ALLEGRO_EVENT event;
+				al_wait_for_event(queue, &event);
+				
+				if(event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+				{
+					if(event.mouse.x >=105  && event.mouse.x <=105+attack_x && event.mouse.y >=140  && event.mouse.y <=140+attack_y)           
+					{
+						if(!strcmp(letter->letter.mode,"defensive")){
+							strcpy(letter->letter.mode,"attack");
+						}
+						select = 1;
+					}else if(event.mouse.x >=805  && event.mouse.x <=805+defensive_x && event.mouse.y >=140  && event.mouse.y <=140+defensive_y)
+					{
+						if(!strcmp(letter->letter.mode,"attack")){
+							strcpy(letter->letter.mode,"defensive");
+						}
+						select = 1;
+					}
+				}
+			}
+		 	al_flip_display();
+	}
+	al_destroy_event_queue(queue);
 }
 int escolha(){
 	ALLEGRO_EVENT_QUEUE* queue 	= NULL;
@@ -919,15 +978,29 @@ int main(void)
 	
 			case 2:
 				if(round > 1){
-					tLinked_list* atacador = select_card_filed(player[0],+115);
-					tLinked_list* atacado = select_card_filed(player[1],-115);
-					battle(atacador,atacado,&player[0],&player[1]);	
-			
 					window_game_field();
 					monster_field(player[0],+115);
 					monster_field(player[1],-115);
+					
+					tLinked_list* atacador = select_card_filed(player[0],+115);
+					
+					mod(atacador);
+					window_game_field();
 					display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
 					display_hand_card(player[1]);
+					monster_field(player[0],+115);
+					monster_field(player[1],-115);
+					
+					tLinked_list* atacado = select_card_filed(player[1],-115);
+					
+					battle(atacador,atacado,&player[0],&player[1]);	
+			
+					window_game_field();
+					display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
+					display_hand_card(player[1]);
+					monster_field(player[0],+115);
+					monster_field(player[1],-115);
+					
 					al_flip_display();
 				}
 			break;
@@ -939,7 +1012,9 @@ int main(void)
 	}
 		
 		++round;
-		
+		if(player[0].life <=0 || (player[1].life <= 0)){
+			break;
+		}
 		bot(&player[0],&player[1]);
 	
 		window_game_field();
@@ -949,7 +1024,35 @@ int main(void)
 		monster_field(player[1],-115);
 		al_flip_display();
 		
-		add_hand_card(&player[0]);
+		if(player[0].life <=0 || (player[1].life <= 0)){
+			al_clear_to_color(al_map_rgb(0, 0, 0));
+			fprintf(stderr,"\n O jogo vai acabar");
+			ganhador = 1;
+			
+		}else{
+			add_hand_card(&player[0]);
+		}
 	}
-	while(1);
+	
+	 
+	if( player[0].life <= 0){
+		fprintf(stderr,"\n Entrou 1");
+		ALLEGRO_BITMAP* lose = NULL;
+		lose = al_load_bitmap("lose.png");
+		verifica_bitmap(lose,"Lose");
+		al_draw_bitmap(lose,WIDTH/4,HEIGHT/4,0);	
+	}else{
+		fprintf(stderr,"\n Entrou 2");
+		ALLEGRO_BITMAP* winner = NULL;
+		winner = al_load_bitmap("winner.png");
+		verifica_bitmap(winner,"Winner");
+		al_draw_bitmap(winner,WIDTH/4,HEIGHT/4,0);
+	}
+	al_flip_display();
+
+	
+	al_rest(10.0);
+	
+	al_destroy_display(home_screen);
+	//free(player);
 }
