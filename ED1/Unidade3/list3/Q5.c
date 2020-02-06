@@ -62,7 +62,7 @@ int main(){
 			printf("\nIndice:%d Endereco:%d Valor:%d",i,table[i], table[i]->id);
 			while(table[i]->next != NULL){
 				table[i]= table[i]->next;
-				printf("-> Endereco:%d Valor:%d ",table[i], table[i]->id);
+				printf("-> Endereco:%ls Valor:%d ",table[i], table[i]->id);
 			}	
 	
 		++i;

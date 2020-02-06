@@ -47,14 +47,14 @@ int main(){
 	
 	while(element != NULL){
 		int endereco = (element->id % qtd);
-		table[endereco] = element;
+		*table[endereco] = &element;
 		element = element->next;
 	}
 	
 	int i=0;
 	while(i < qtd)
 	{
-		printf("\n posicao:%d endereco:%d",i,table[i]);
+		printf("\n posicao:%d endereco:%ls",i,table[i]);
 		++i;
 	}
 	

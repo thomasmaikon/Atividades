@@ -1,0 +1,3 @@
+13)
+
+R: A complexidade dos algoritmos ao criar cresce na medida em que sua velocidade em buscar um determinado valor diminui.

@@ -7,7 +7,7 @@
 #define HEIGHT 960 // altura
 #define WIDTH 540 // largura
 #define MAX_LETTER_FIELD 3
-#define MAX_LETTER 5 // maximo de cartas que eu vou ler do arquivo .csv
+#define MAX_LETTER 6 // maximo de cartas que eu vou ler do arquivo .csv
 #define SIZE_NAME_DECK 50 // tamanho do nome de um deck
 #define SIZE_NAME_LETTER 30 // tamanho do nome de uma carta
 #define ERRO 0 // tomar cuidado, anteriormente estava retornando -1
@@ -33,38 +33,25 @@ typedef struct
 	tLetter letter[MAX_LETTER];
 }tDeck;
 
-typedef struct sCard_hand
+typedef struct sLinked_list
 {
 	tLetter letter;
-	struct sCard_hand* previous;
-	struct sCard_hand* next;
-}tCard_hand;
-
-typedef struct
-{
-	int start;
-	int end;
-	tLetter letter[MAX_LETTER_FIELD];
-}tField;
+	struct sLinked_list* previous;
+	struct sLinked_list* next;
+}tLinked_list;
 
 typedef struct
 {
 	int  life; 
 	char  name[SIZE_NAME_DECK];
 	int qtd_hand_card;
-	tCard_hand* hand;// lista duplamente encadeada para cartas na mao
-	tField field; // fila para os monstros em campo
+	int qtd_field_card;
+	tLinked_list* hand;// lista duplamente encadeada para cartas na mao
+	tLinked_list* field; // lista de campos
 	tDeck deck; // pilha do meu baralho
 	
 	float position[2];
 }tPlayer;
-
-// ======================================Funcoes DE FILAS===================================
-void start(tField* field)
-{
-	field->start = -1;
-	field->end = -1;
-}
 
 tLetter get_letter(char* name,char* defensive,int attack,int defense)
 {
@@ -77,55 +64,10 @@ tLetter get_letter(char* name,char* defensive,int attack,int defense)
 		return letter;
 }
 
-int insert_letter(tField* field, tLetter letter)
-{
-	int position = (field->start+1) % MAX_LETTER_FIELD;
-	
-	if(position == field->start)
-	{
-		fprintf(stderr,"\nFila cheia\n");
-		return ERRO;
-	}
-	
-	//	fprintf(stderr,"\nInserindo Carta\n");
-	
-	if(field->start == -1)
-	{
-		field->start += 1;
-	}
-	
-	field->end = field->end +1;
-	field->letter[field->end] = letter;
-	return SUCCESSFUL;
-}
-
-int remove_letter_field(tField* field,tLetter letter){
-	int i=0;
-	int k=0;
-	while(i <= field->end){
-		fprintf(stderr,"\n%d",i);
-		if(!strcmp(letter.name,field->letter[i].name)){
-			fprintf(stderr,"\ncarta -> %s",field->letter[i].name);
-			k = 1;
-		}
-		if(k = 1){
-				fprintf(stderr,"\n%d  == %d",i,field->end);
-			if(i == field->end ){
-			//	fprintf(stderr,"Nao faz nada");
-			}else{
-			//	fprintf(stderr,"faz algo");
-				field->letter[i] = field->letter[i+1];	
-			}
-				
-		}
-		++i;
-	}
-
-	field->end = field->end-1;
-	return SUCCESSFUL;
-}
-
 // ======================================Funcoes DE pilha===================================
+void start_stack(tDeck* deck){
+	deck->end = -1;
+}
 void set_deck(char* nome,tDeck* deck)
 {
 
@@ -161,11 +103,6 @@ void set_deck(char* nome,tDeck* deck)
 	}	
 }
 
-void start_stack(tDeck* deck)
-{
-	deck->end = -1;
-}
-
 int add_stack(tDeck* deck, tLetter letter)
 {
 	if(deck->end == MAX_LETTER)
@@ -190,9 +127,9 @@ int remove_stack(tDeck* deck)
 	return SUCCESSFUL;
 }
 // ======================================Funcoes DE Lista duplamente encadeada ===================================
-tCard_hand* get_card_hand(tLetter letter)
+tLinked_list* get_Linked_list(tLetter letter)
 {
-	tCard_hand* New = (tCard_hand*)calloc(1,sizeof(tCard_hand));
+	tLinked_list* New = (tLinked_list*)calloc(1,sizeof(tLinked_list));
 	
 	New->letter = letter;
 	New->next = NULL;
@@ -201,14 +138,14 @@ tCard_hand* get_card_hand(tLetter letter)
 	return New;
 }
 
-void add_hand_card(tCard_hand** hand,tLetter letter)
+void add_list_card(tLinked_list** list,tLetter letter)
 {
-	tCard_hand* p = *hand;
-	tCard_hand* New = get_card_hand(letter);
-	
-	if(*hand == NULL)
+	tLinked_list* p = *list;
+	tLinked_list* New = get_Linked_list(letter);
+	fprintf(stderr,"\n Adicionando carta -> %s", letter.name);
+	if(*list == NULL)
 	{
-		*hand = New;
+		*list = New;
 	}
 	else
 	{
@@ -221,10 +158,9 @@ void add_hand_card(tCard_hand** hand,tLetter letter)
 	}
 }
 
-void remove_hand_card(tCard_hand** hand,tCard_hand* card)
+void remove_list_card(tLinked_list** list,tLinked_list* card)
 {
-	tCard_hand* p = *hand;
-	
+	tLinked_list* p = *list;
 
 	while(p != card)
 	{
@@ -233,9 +169,9 @@ void remove_hand_card(tCard_hand** hand,tCard_hand* card)
 	}
 	
 	//	fprintf(stderr,"\ncarta encontrada: %s carta esperada :%s",p->letter.name,card->letter.name );
-	if(p == *hand)
+	if(p == *list)
 	{
-		*hand = p->next;	
+		*list = p->next;	
 	}else
 	{
 		if(p->next != NULL)
@@ -248,11 +184,7 @@ void remove_hand_card(tCard_hand** hand,tCard_hand* card)
 			p->previous->next = p->next;
 		}
 	}
-	
-	
-	
 }
-
 // ======================================Funcoes DE JANELAS===================================
 ALLEGRO_DISPLAY* window(ALLEGRO_DISPLAY *home_screen,int x,int y)
 {
@@ -454,23 +386,23 @@ int Deck(ALLEGRO_DISPLAY* home_screen,tDeck* deck)
 
 
 //======================================FUNCAO GAME===================================
-void init_game(tPlayer* player,tDeck deck,float px,float py)
+void start(tPlayer* player,tDeck deck,float px,float py)
 {
+	player->hand = NULL;
+	player->field = NULL;
+	player->deck.end = -1;
 	player->life = 4000;
 	player->deck = deck;
 	player->qtd_hand_card = INIT_HAND_CARD;
+	player->qtd_field_card = 0;
 	player->position[0] = px;
 	player->position[1] = py;
-}
-
-void start_hand(tPlayer* player)
-{
-	player->hand = NULL;
 	
 	int i;
+
 	for(i=0;i< INIT_HAND_CARD;++i)
 	{
-		add_hand_card(&player->hand,player->deck.letter[i]);
+		add_list_card(&player->hand,player->deck.letter[i]);
 		remove_stack(&player->deck);
 	}
 	
@@ -497,8 +429,10 @@ void display_hand_card(tPlayer player)
 	float y = player.position[1];
 	int dist = space_cards(player,520);
 	
+	fprintf(stderr,"\n Exibindo as Cartas da Mao:");
 	while(player.hand != NULL)
 	{
+		fprintf(stderr," mao -> %s",player.hand->letter.name);
 		img = al_load_bitmap(player.hand->letter.name);
 		verifica_bitmap(img,"img");
 		al_draw_bitmap(img,x + i*dist,y,0);	
@@ -511,7 +445,7 @@ void display_hand_card(tPlayer player)
 	// falta configurar o espacamento das cartas para poder ler a carta e para poder deixal-as organizado
 }
 
-tCard_hand* select_card(tPlayer player,float space_card,int adicional)
+tLinked_list* select_card(tPlayer player,float space_card,int adicional)
 {
 
 	ALLEGRO_EVENT_QUEUE *queue 	= NULL;
@@ -523,7 +457,7 @@ tCard_hand* select_card(tPlayer player,float space_card,int adicional)
 	int range_x = al_get_bitmap_width(img); // pega largura e altura de uma imagem
 	int range_y = al_get_bitmap_height(img);
 	
-	float position_x = player.position[0]; // pega a posição em que as imagens vao ficar
+	float position_x = player.position[0]; // pega a posiï¿½ï¿½o em que as imagens vao ficar
 	float position_y = player.position[1] + adicional;
 	
 	int select=0;
@@ -565,50 +499,52 @@ tCard_hand* select_card(tPlayer player,float space_card,int adicional)
 	}
 	//fprintf(stderr,"\n Carta Selecionada");
 	al_destroy_event_queue(queue);
+	fprintf(stderr,"\nCarta Selecionada -> %s",player.hand->letter.name);
   	return player.hand ;
 }
 
 void monster_field(tPlayer player, int adicional)
 {
+	fprintf(stderr,"\nExibindo Cartas do Campo:");
 	ALLEGRO_BITMAP* image_monster = NULL;
 
-	tField field = player.field;
+	tLinked_list* field = player.field;
 
 	int i=0;
 	int x = player.position[0];
 	int y = player.position[1] + adicional;
 	
-	while(i<=field.end)
+	while(field != NULL)
 	{
-	
-			fprintf(stderr,"\nExibindo Carta");
-			fprintf(stderr,"\n ->Carta:%s",field.letter[i].name);
-			if(!strcmp(field.letter[i].mode,"attack"))
-			{
-				image_monster = al_load_bitmap(field.letter[i].name);
-				verifica_bitmap(image_monster,"image_monster");
-				al_draw_bitmap(image_monster,x + i*150,y,0);
-				al_flip_display();
-			}else if(!strcmp(field.letter[i].mode,"defensive"))
-			{
-				image_monster = al_load_bitmap(field.letter[i].defensive_name);
-				verifica_bitmap(image_monster,"image_monster");
-				al_draw_bitmap(image_monster,x + i*150,y+20,0);
-				al_flip_display();
-			}
+		fprintf(stderr,"\n ->Carta:%s",field->letter.name);
+		if(!strcmp(field->letter.mode,"attack"))
+		{
+			image_monster = al_load_bitmap(field->letter.name);
+			verifica_bitmap(image_monster,"image_monster");
+			al_draw_bitmap(image_monster,x + i*150,y,0);
+			al_flip_display();
+		}else if(!strcmp(field->letter.mode,"defensive"))
+		{
+			image_monster = al_load_bitmap(field->letter.defensive_name);
+			verifica_bitmap(image_monster,"image_monster");
+			al_draw_bitmap(image_monster,x + i*150,y+20,0);
+			al_flip_display();
+		}
 	++i;
+	field=field->next;
 	}
 }
 
 void window_game_field()
 {
+	al_clear_to_color(al_map_rgb(0, 0, 0));
 	ALLEGRO_BITMAP* game = NULL;
 	game = al_load_bitmap("game.jpg");
 	verifica_bitmap(game,"game");
 	al_draw_bitmap(game,0,0,0);	
 }
 
-int select_mode(tCard_hand* hand, tPlayer* player)
+int select_mode(tLinked_list* hand, tPlayer* player)
 {
 	ALLEGRO_BITMAP* mode_attack = NULL;
 	ALLEGRO_BITMAP* mode_defensive = NULL;
@@ -650,28 +586,30 @@ int select_mode(tCard_hand* hand, tPlayer* player)
 				{
 					if(event.mouse.x >=105  && event.mouse.x <=105+attack_x && event.mouse.y >=140  && event.mouse.y <=140+attack_y)           
 					{
-						if(insert_letter(&player->field,hand->letter)){
-							remove_hand_card(&player->hand,hand);
+						if(player->qtd_field_card<MAX_LETTER_FIELD){
+							strcpy(hand->letter.mode,"attack");
+							add_list_card(&player->field,hand->letter);
+							remove_list_card(&player->hand,hand);
 							player->qtd_hand_card -=1;
-							strcpy(player->field.letter[player->field.end].mode,"attack");
+							player->qtd_field_card +=1;
 							select = 1;
 						}else{
 							return ERRO;
 						}
 					}else if(event.mouse.x >=805  && event.mouse.x <=805+defensive_x && event.mouse.y >=140  && event.mouse.y <=140+defensive_y)
 					{
-						if(insert_letter(&player->field,hand->letter)){
-							remove_hand_card(&player->hand,hand);
+						if(player->qtd_field_card<MAX_LETTER_FIELD){
+							strcpy(hand->letter.mode,"defensive");
+							add_list_card(&player->field,hand->letter);
+							remove_list_card(&player->hand,hand);
 							player->qtd_hand_card -=1;
-							strcpy(player->field.letter[player->field.end].mode,"defensive");
+							player->qtd_field_card +=1;
 							select = 1;	
 						}else{
 							return ERRO;
 						}
 					}
 				}
-				
-		
 			}
 		 	al_flip_display();
 	}
@@ -679,7 +617,7 @@ int select_mode(tCard_hand* hand, tPlayer* player)
 	return SUCCESSFUL;
 }
 
-tLetter select_card_filed(tPlayer player,int adicional)
+tLinked_list* select_card_filed(tPlayer player,int adicional)
 {
 	
 	//fprintf(stderr,"\nSelecione sua carta do campo");
@@ -694,7 +632,7 @@ tLetter select_card_filed(tPlayer player,int adicional)
 	int range_x = al_get_bitmap_width(img); // pega largura e altura de uma imagem
 	int range_y = al_get_bitmap_height(img);
 	
-	float position_x = player.position[0]; // pega a posição em que as imagens vao ficar
+	float position_x = player.position[0]; // pega a posiï¿½ï¿½o em que as imagens vao ficar
 	float position_y = player.position[1] + adicional;
 	
 	int select=0;
@@ -706,9 +644,191 @@ tLetter select_card_filed(tPlayer player,int adicional)
 		fprintf(stderr,"Falha ao tentar criar uma Fila de eventos 'queue'");
 	}
 	
+	if(player.qtd_field_card >= 1){
+		al_register_event_source(queue,al_get_mouse_event_source());
+		int i=0;
+		while(!select)
+		{
+				while(!al_is_event_queue_empty(queue))
+				{
+					ALLEGRO_EVENT event;
+					al_wait_for_event(queue, &event);
+					
+					if(event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+					{
+						if(event.mouse.x >=position_x+75*i+(75*i)  && event.mouse.x <=position_x+75*(i+1)+(75*i) && event.mouse.y >=position_y  && event.mouse.y <=position_y+range_y)           
+						{
+							int card = 0;
+							while(card != i ){
+								player.field = player.field->next;
+								++card;
+							}
+							select = 1;
+						}
+					}
+					i = (i+1) % (player.qtd_field_card);
+				}
+		 		al_flip_display();
+		}
+	}else{
+		return NULL;
+	}
 	//coloca na fila as acoes do mouse
-	al_register_event_source(queue,al_get_mouse_event_source());
-	int i=0;
+	
+	
+	al_destroy_event_queue(queue);
+	al_destroy_bitmap(img);
+  	return player.field;
+}
+
+int battle(tLinked_list* attack,tLinked_list* attacked, tPlayer* atacante, tPlayer* defensor){
+	
+	int value;
+
+	if(!strcmp(attack->letter.mode,"defensive")){
+		
+	}else{
+		if(attacked != NULL){	
+			if(!strcmp(attacked->letter.mode,"defensive")){
+				value = attacked->letter.defense;
+			}else{
+				value = attacked->letter.attack;
+			}
+			int result = (attack->letter.attack - value);
+			fprintf(stderr,"\n result:%d",result);
+			if(result < 0 ){
+				remove_list_card(&atacante->field,attack);
+				atacante->life = atacante->life + result;
+				atacante->qtd_field_card -=1;
+			}else if(result > 0){
+				remove_list_card(&defensor->field,attacked);
+				defensor->life = defensor->life - result;
+				defensor->qtd_field_card -=1;
+			}else if(result == 0 ){
+				remove_list_card(&atacante->field,attack);
+				remove_list_card(&defensor->field,attacked);
+				atacante->qtd_field_card -=1;
+				defensor->qtd_field_card -=1;
+			}
+		}else{
+		defensor->life = defensor->life - attack->letter.attack;
+		}
+	}
+
+	fprintf(stderr,"\nVida do jogador q ataca-> %d",atacante->life);
+	fprintf(stderr,"\nVida do jogador q defende-> %d",defensor->life);
+
+	return SUCCESSFUL;
+}
+void add_hand_card(tPlayer* player)
+{
+	fprintf(stderr,"\n Adicionando carta do deck");
+	if(player->deck.end >=0){
+		fprintf(stderr,"\n Carta do Deck-> %s",player->deck.letter[player->deck.end].name);
+		add_list_card(&player->hand,player->deck.letter[player->deck.end]);
+		remove_stack(&player->deck);
+		player->qtd_hand_card+=1;
+	}
+}
+
+
+tLinked_list* best_letter_field_bot(tPlayer player){
+	tLinked_list* p = player.field;
+	
+	int i;
+	for(i=1;i<=player.qtd_field_card;++i){
+		if((player.field->letter.attack+player.field->letter.defense) > (p->letter.attack+p->letter.defense))	{
+			p = player.field;
+		}
+		player.field = player.field->next;
+	}
+	
+	return p;
+}
+tLinked_list* most_letter_field_bot(tPlayer player){
+	tLinked_list* p = player.field;
+	int i=1;
+
+	while(i<=player.qtd_field_card)
+	{
+		if((player.field->letter.attack+player.field->letter.defense) < (p->letter.attack+p->letter.defense))	{
+			p = player.field;
+		}
+		++i;
+		player.field = player.field->next;
+	}
+	return p;
+}
+tLinked_list* select_letter_hand_bot(tPlayer player){
+	
+	tLinked_list* p = player.hand;
+	
+	while(player.hand!=NULL){
+		if((player.hand->letter.attack+player.hand->letter.defense) > (p->letter.attack+p->letter.defense))
+		{
+			p = player.hand;
+		}
+		player.hand = player.hand->next;
+	}
+	fprintf(stderr,"\n Peguei a minha melhor carta");
+	return p;
+}
+
+tLinked_list* remove_letter_hand_bot(tPlayer player,tLinked_list* letter){
+	while(player.hand != letter){
+	//	fprintf(stderr,"\n -->Carta encontrada %s",player.hand->letter.name);
+		player.hand = player.hand->next;
+	}
+//	fprintf(stderr,"\n -->Carta encontrada %s",player.hand->letter.name);
+	return player.hand;
+}
+
+void bot(tPlayer* p1,tPlayer* bot){
+	
+	while(bot->qtd_field_card <3){
+		fprintf(stderr,"\n eu sei que voce nao tem cartas");
+		tLinked_list* best = select_letter_hand_bot(*bot);
+		tLinked_list* remove = remove_letter_hand_bot(*bot,best);
+		if(best->letter.attack >= best->letter.defense){
+			strcpy(best->letter.mode,"attack");
+			add_list_card(&bot->field,best->letter);
+			remove_list_card(&bot->hand,remove);
+			bot->qtd_hand_card -=1;
+			bot->qtd_field_card+=1;
+		}else{
+			strcpy(best->letter.mode,"defensive");
+			add_list_card(&bot->field,best->letter);
+			remove_list_card(&bot->hand,bot->hand);
+			bot->qtd_hand_card -=1;
+			bot->qtd_field_card+=1;
+		}
+		//fprintf(stderr,"\nsetando carta do bot");
+	}
+	fprintf(stderr,"\n quantidade de cartas %d",bot->qtd_field_card);
+	if(bot->qtd_field_card >=1){
+			tLinked_list* best = best_letter_field_bot(*bot);
+			tLinked_list* most = best_letter_field_bot(*p1);
+			
+			battle(best,most,bot,p1);
+	}
+	
+}
+int escolha(){
+	ALLEGRO_EVENT_QUEUE* queue 	= NULL;
+	ALLEGRO_BITMAP* escolha = NULL;
+	
+	escolha = al_load_bitmap("escolha.png");
+	verifica_bitmap(escolha,"escolha");
+	al_draw_bitmap(escolha ,0, 0, 0);
+	int select=0, result = 0;
+
+	queue = al_create_event_queue();
+	if(!queue)
+	{
+		fprintf(stderr,"Falha ao tentar criar uma Fila de eventos 'queue'");
+	}
+	
+		al_register_event_source(queue,al_get_mouse_event_source());
 	while(!select)
 	{
 			while(!al_is_event_queue_empty(queue))
@@ -718,136 +838,33 @@ tLetter select_card_filed(tPlayer player,int adicional)
 				
 				if(event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
 				{
-					if(event.mouse.x >=position_x+75*i+(75*i)  && event.mouse.x <=position_x+75*(i+1)+(75*i) && event.mouse.y >=position_y  && event.mouse.y <=position_y+range_y)           
+					if(event.mouse.x >=0  && event.mouse.x <=35 && event.mouse.y >=0 && event.mouse.y <=40)           
 					{
-						letter = player.field.letter[i];
+						result = 1;
+						select = 1;
+					}else if (event.mouse.x >=0  && event.mouse.x <=35 && event.mouse.y >=40 && event.mouse.y <=90){
+						result =  2;
+						select = 1;
+
+					}else if(event.mouse.x >=0  && event.mouse.x <=35 && event.mouse.y >=40 && event.mouse.y <=130){
+						result = 3;
 						select = 1;
 					}
 				}
-				
-				i = (i+1) % (player.field.end+1);
-			}
-		 	al_flip_display();
+				}
+	 		al_flip_display();
 	}
-	
+	//coloca na fila as acoes do mouse
 	al_destroy_event_queue(queue);
-	al_destroy_bitmap(img);
-  	return letter;
+	al_destroy_bitmap(escolha);
+  	return result;
 }
 
-int battle(tLetter attack,tLetter attacked, tPlayer* atacante, tPlayer* defensor){
-	
-	int value;
-	
-	if(!strcmp(attacked.mode,"defensive")){
-		value = attacked.defense;
-	}else{
-		value = attacked.attack;
-	}
-	
-	int result = (attack.attack - value);
-	
-	if(result < 0 ){
-		remove_letter_field(&atacante->field,attack);
-		atacante->life = atacante->life + result;
-	}else if(result > 0){
-		remove_letter_field(&defensor->field,attacked);
-		defensor->life = defensor->life - result;
-	}else{
-		remove_letter_field(&atacante->field,attack);
-		atacante->life = atacante->life + result;
-		remove_letter_field(&defensor->field,attacked);
-		defensor->life = defensor->life - result;
-	}
-
-	return SUCCESSFUL;
-}
-tLetter best_letter_bot(tPlayer player){
-	tLetter letter;
-	letter.attack = 0;
-	letter.defense = 0;
-	int i;
-	for(i=0;i<=player.field.end;++i){
-		if((player.field.letter[i].attack+player.field.letter[i].defense) > (letter.attack+letter.defense))	{
-			letter = player.field.letter[i];
-		}
-	}
-	
-	return letter;
-}
-tLetter most_letter_bot(tPlayer player){
-	tLetter letter = player.field.letter[0];
-	int i=0;
-
-	while(i<=player.field.end)
-	{
-		if((player.field.letter[i].attack+player.field.letter[i].defense) < (letter.attack+letter.defense))	{
-			
-			letter = player.field.letter[i];
-		}
-		++i;
-	}
-	return letter;
-}
-tLetter select_letter_bot(tPlayer player){
-	tLetter letter;
-	letter.attack = 0;
-	letter.defense = 0;
-
-	while(player.hand!=NULL){
-		if((player.hand->letter.attack+player.hand->letter.defense) > (letter.attack+letter.defense))
-		{
-			letter = player.hand->letter;
-		}
-		player.hand = player.hand->next;
-	}
-	
-	return letter;
-}
-
-tCard_hand* remove_letter_bot(tPlayer player,tLetter letter){
-	while((player.hand->letter.attack+player.hand->letter.defense) != (letter.attack+letter.defense)){
-	//	fprintf(stderr,"\n -->Carta encontrada %s",player.hand->letter.name);
-		player.hand = player.hand->next;
-	}
-//	fprintf(stderr,"\n -->Carta encontrada %s",player.hand->letter.name);
-	return player.hand;
-}
-
-void bot(tPlayer* p1,tPlayer* bot){
-
-	
-	if(bot->field.end < 0){
-		tLetter best = select_letter_bot(*bot);
-		tCard_hand* remove = remove_letter_bot(*bot,best);
-		if(best.attack >= best.defense){
-			if(insert_letter(&bot->field,best)){
-				remove_hand_card(&bot->hand,remove);
-				bot->qtd_hand_card -=1;
-				strcpy(bot->field.letter[bot->field.end].mode,"attack");
-			}
-		}else{
-			if(insert_letter(&bot->field,best)){
-				remove_hand_card(&bot->hand,bot->hand);
-				bot->qtd_hand_card -=1;
-				strcpy(bot->field.letter[bot->field.end].mode,"defensive");
-			}
-		}
-		//fprintf(stderr,"\nsetando carta do bot");
-	}
-	if(bot->field.end >=0){
-			tLetter best = best_letter_bot(*bot);
-			tLetter most = best_letter_bot(*p1);
-			
-			
-			battle(best,most,bot,p1);
-	}
-}
 // ======================================FUNCAO MAIN===================================
 
 int main(void)
 {
-	ALLEGRO_DISPLAY *home_screen = NULL; // janela DEFAULT para tudo, o que mudamos é apenas o conteudo que será apresentado
+	ALLEGRO_DISPLAY *home_screen = NULL; // janela DEFAULT para tudo, o que mudamos ï¿½ apenas o conteudo que serï¿½ apresentado
 	home_screen = window(home_screen,HEIGHT,WIDTH);
 	
 	tDeck deck1,deck2;
@@ -862,19 +879,11 @@ int main(void)
 	
 	tPlayer	player[2];
 
-	init_game(&player[0],deck1, 246,20);
-	init_game(&player[1],deck2,246,362);
-	
-	start_hand(&player[0]);// inicia a mao com 5 cartas;
-	start_hand(&player[1]);
-	
-	start(&player[0].field); // inicializo a fila de monstros em campo de cada jogador
-	start(&player[1].field);
+	start(&player[0],deck1, 246,20);// inicia todas as estrutura de fila e listas encadeadas sendo a mao com 5 elementos;
+	start(&player[1],deck2,246,362);
 
 	al_destroy_display(home_screen);
 	home_screen = window(home_screen,HEIGHT,WIDTH);
-	
-
 	
 	window_game_field();
 	
@@ -882,42 +891,65 @@ int main(void)
 	int ganhador = 0;
 	while(!ganhador){
 	
-	display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
-	display_hand_card(player[1]);
-	
+		
 
 // Renderiza a tela com as cartas em questao	
-	select_mode(select_card(player[0],space_cards(player[0],space_card),0),&player[0]); //Seleciona carta e define seu modo
 	window_game_field();
-	monster_field(player[0],+115);
-	monster_field(player[1],-115);
 	display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
 	display_hand_card(player[1]);
-	al_flip_display();
-	
-		if(round > 1){
-			tLetter atacador = select_card_filed(player[0],+115);
-			tLetter atacado = select_card_filed(player[1],-115);
-			battle(atacador,atacado,&player[0],&player[1]);	
-			
-			window_game_field();
-			monster_field(player[0],+115);
-			monster_field(player[1],-115);
-			display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
-			display_hand_card(player[1]);
-			al_flip_display();
-		}
-		++round;
-	
-	bot(&player[0],&player[1]);
-	//fprintf(stderr,"\n %s",player[1].field.letter[player[1].field.end].name);
-	window_game_field();
 	monster_field(player[0],+115);
 	monster_field(player[1],-115);
-	display_hand_card(player[1]);
-	al_flip_display();
+	char opcao = 'e';
+	while(opcao != 's'){
+		switch (escolha())
+		{
+			case 1:
+				window_game_field();
+				display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
+				monster_field(player[0],+115);
+				monster_field(player[1],-115);
+				select_mode(select_card(player[0],space_cards(player[0],space_card),0),&player[0]); //Seleciona carta e define seu modo
+				window_game_field();
+				display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
+				display_hand_card(player[1]);
+				monster_field(player[0],+115);
+				monster_field(player[1],-115);
+				al_flip_display();
+			break;
 	
-
+			case 2:
+				if(round > 1){
+					tLinked_list* atacador = select_card_filed(player[0],+115);
+					tLinked_list* atacado = select_card_filed(player[1],-115);
+					battle(atacador,atacado,&player[0],&player[1]);	
+			
+					window_game_field();
+					monster_field(player[0],+115);
+					monster_field(player[1],-115);
+					display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
+					display_hand_card(player[1]);
+					al_flip_display();
+				}
+			break;
+				
+			case 3:
+				opcao = 's';
+			break;
+		}
+	}
+		
+		++round;
+		
+		bot(&player[0],&player[1]);
+	
+		window_game_field();
+		display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
+		display_hand_card(player[1]);
+		monster_field(player[0],+115);
+		monster_field(player[1],-115);
+		al_flip_display();
+		
+		add_hand_card(&player[0]);
 	}
 	while(1);
 }
