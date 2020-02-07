@@ -7,7 +7,7 @@
 #define HEIGHT 960 // altura
 #define WIDTH 540 // largura
 #define MAX_LETTER_FIELD 3
-#define MAX_LETTER 6 // maximo de cartas que eu vou ler do arquivo .csv
+#define MAX_LETTER 8 // maximo de cartas que eu vou ler do arquivo .csv
 #define SIZE_NAME_DECK 50 // tamanho do nome de um deck
 #define SIZE_NAME_LETTER 30 // tamanho do nome de uma carta
 #define ERRO 0 // tomar cuidado, anteriormente estava retornando -1
@@ -88,7 +88,7 @@ void set_deck(char* nome,tDeck* deck)
 		do{
 		
 			sscanf(strtok(line,";"),"%s",name);
-			
+			//fprintf(stderr,"\n -> Carta inserida no Deck:%s",name)
 			sscanf(strtok(NULL,";"),"%s",defense_name);
 		
 			sscanf(strtok(NULL,";"),"%d",&attack);
@@ -400,11 +400,17 @@ void start(tPlayer* player,tDeck deck,float px,float py)
 	
 	int i;
 
-	for(i=0;i< INIT_HAND_CARD;++i)
-	{
-		add_list_card(&player->hand,player->deck.letter[i]);
+		add_list_card(&player->hand,player->deck.letter[player->deck.end]);
 		remove_stack(&player->deck);
-	}
+		add_list_card(&player->hand,player->deck.letter[player->deck.end]);
+		remove_stack(&player->deck);
+		add_list_card(&player->hand,player->deck.letter[player->deck.end]);
+		remove_stack(&player->deck);
+		add_list_card(&player->hand,player->deck.letter[player->deck.end]);
+		remove_stack(&player->deck);
+		add_list_card(&player->hand,player->deck.letter[player->deck.end]);
+		remove_stack(&player->deck);
+	
 	
 }
 
@@ -440,9 +446,6 @@ void display_hand_card(tPlayer player)
 		++i;
 		x=x+75;
 	}
-	
-//	fprintf(stderr,"\n Cartas Da mao exibidas");
-	// falta configurar o espacamento das cartas para poder ler a carta e para poder deixal-as organizado
 }
 
 tLinked_list* select_card(tPlayer player,float space_card,int adicional)
@@ -695,15 +698,19 @@ int battle(tLinked_list* attack,tLinked_list* attacked, tPlayer* atacante, tPlay
 				value = attacked->letter.attack;
 			}
 			int result = (attack->letter.attack - value);
-			fprintf(stderr,"\n result:%d",result);
+		//fprintf(stderr,"\n result:%d",result);
 			if(result < 0 ){
 				remove_list_card(&atacante->field,attack);
 				atacante->life = atacante->life + result;
 				atacante->qtd_field_card -=1;
 			}else if(result > 0){
 				remove_list_card(&defensor->field,attacked);
+				if(!strcmp(attacked->letter.mode,"defensive")){
+					defensor->qtd_field_card -=1;
+				}else{
 				defensor->life = defensor->life - result;
-				defensor->qtd_field_card -=1;
+				defensor->qtd_field_card -=1;	
+				}
 			}else if(result == 0 ){
 				remove_list_card(&atacante->field,attack);
 				remove_list_card(&defensor->field,attacked);
@@ -770,23 +777,23 @@ tLinked_list* select_letter_hand_bot(tPlayer player){
 		}
 		player.hand = player.hand->next;
 	}
-	fprintf(stderr,"\n Peguei a minha melhor carta");
+	//fprintf(stderr,"\n Peguei a minha melhor carta");
 	return p;
 }
 
 tLinked_list* remove_letter_hand_bot(tPlayer player,tLinked_list* letter){
 	while(player.hand != letter){
-	//	fprintf(stderr,"\n -->Carta encontrada %s",player.hand->letter.name);
 		player.hand = player.hand->next;
 	}
 //	fprintf(stderr,"\n -->Carta encontrada %s",player.hand->letter.name);
 	return player.hand;
 }
 
-void bot(tPlayer* p1,tPlayer* bot){
+void bot(tPlayer* p1,tPlayer* bot,int round){
+	
+	add_hand_card(bot);
 	
 	while(bot->qtd_field_card <3){
-		fprintf(stderr,"\n eu sei que voce nao tem cartas");
 		tLinked_list* best = select_letter_hand_bot(*bot);
 		tLinked_list* remove = remove_letter_hand_bot(*bot,best);
 		if(best->letter.attack >= best->letter.defense){
@@ -978,6 +985,8 @@ int main(void)
 	
 			case 2:
 				if(round > 1){
+					if(player->field != NULL){
+					
 					window_game_field();
 					monster_field(player[0],+115);
 					monster_field(player[1],-115);
@@ -1000,7 +1009,9 @@ int main(void)
 					display_hand_card(player[1]);
 					monster_field(player[0],+115);
 					monster_field(player[1],-115);
-					
+				
+					}
+				
 					al_flip_display();
 				}
 			break;
@@ -1015,7 +1026,7 @@ int main(void)
 		if(player[0].life <=0 || (player[1].life <= 0)){
 			break;
 		}
-		bot(&player[0],&player[1]);
+		bot(&player[0],&player[1],round);
 	
 		window_game_field();
 		display_hand_card(player[0]);// Exibe cartas de cada jogador da mao
@@ -1026,7 +1037,6 @@ int main(void)
 		
 		if(player[0].life <=0 || (player[1].life <= 0)){
 			al_clear_to_color(al_map_rgb(0, 0, 0));
-			fprintf(stderr,"\n O jogo vai acabar");
 			ganhador = 1;
 			
 		}else{
@@ -1036,13 +1046,11 @@ int main(void)
 	
 	 
 	if( player[0].life <= 0){
-		fprintf(stderr,"\n Entrou 1");
 		ALLEGRO_BITMAP* lose = NULL;
 		lose = al_load_bitmap("lose.png");
 		verifica_bitmap(lose,"Lose");
 		al_draw_bitmap(lose,WIDTH/4,HEIGHT/4,0);	
 	}else{
-		fprintf(stderr,"\n Entrou 2");
 		ALLEGRO_BITMAP* winner = NULL;
 		winner = al_load_bitmap("winner.png");
 		verifica_bitmap(winner,"Winner");
