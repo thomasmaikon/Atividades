@@ -1,10 +1,10 @@
-## Installation
+## Instalação
 
 Instale a biblioteca do Allegro, a versao utilizada foi 5.2.2
 link-> [allegro](https://github.com/liballeg/allegro5/releases)
 
 
-## Usage
+## Utilização
 Para executar o arquivo em seu computador Windows, configure o anbiente do DevC++
 
 Configurando Allegro no Windows:
