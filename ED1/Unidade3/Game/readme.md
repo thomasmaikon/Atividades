@@ -12,7 +12,7 @@ Configurando Allegro no Windows:
 
 2- Copie o arquivo extraido para o Disco local C:
 
-##Configurando Allegro no DevC++:
+## Configurando Allegro no DevC++:
 
 1- Crie um novo codigo Fonte
 
