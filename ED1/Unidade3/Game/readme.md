@@ -12,7 +12,8 @@ Configurando Allegro no Windows:
 
 2- Copie o arquivo extraido para o Disco local C:
 
-Configurando Allegro no DevC++:
+##Configurando Allegro no DevC++:
+
 1- Crie um novo codigo Fonte
 
 2- Ferramentas -> Opcoes do Compilador
@@ -23,5 +24,5 @@ Configurando Allegro no DevC++:
 
 5- Diretorios -> C Includes -> Adicione o seguinte caminho: C:\allegro\include
 
-O seu codigo so pode funcionar se tiver o arquivo 'allegro_monolith-5.2.dd'(Minha versao do allegro), caso nao possua o arquivo
+O seu codigo so pode funcionar se tiver o arquivo 'allegro_monolith-5.2.dll'(Minha versao do allegro), caso nao possua o arquivo
 ele gera erro.
